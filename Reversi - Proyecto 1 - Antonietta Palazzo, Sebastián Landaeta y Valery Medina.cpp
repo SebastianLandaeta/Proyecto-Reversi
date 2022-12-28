@@ -1,9 +1,9 @@
 /*	Proyecto 1: Reversi
-    Ingeniera Informtica
+    Ingeniería Informática
     Estructuras de Datos
-    Seccin 1
+    Sección 1
     Alumnos:
-        Sebastin Landaeta (CI: 28.240.979)
+        Sebastián Landaeta (CI: 28.240.979)
         Antonietta Palazzo (CI: 28.619.939)
         Valery Medina (CI: 29.643.312)
 */
@@ -338,17 +338,81 @@ class Partida
         // Una vez realizada la jugada, se convierten las fichas flanqueadas al color del contrario
         void convertir_fichas(Jugador jugador)
         {
-            if (((cont_f > 1) && (cont_f < 6)) && ((cont_c > 1) && (cont_c < 6))) // Comprobar desde todas las direcciones
+            if (((cont_f >= 2) && (cont_f <= 5)) && ((cont_c >= 2) && (cont_c <= 5))) // Comprobar desde el centro
             {
                 comprobar_arriba(jugador);
                 comprobar_abajo(jugador);
-                comprobar_izquierda(jugador);
                 comprobar_derecha(jugador);
+                comprobar_izquierda(jugador);
                 comprobar_arriba_derecha(jugador);
                 comprobar_arriba_izquierda(jugador);
                 comprobar_abajo_derecha(jugador);
                 comprobar_abajo_izquierda(jugador);
-            } 
+            }
+
+            if (((cont_f >= 2) && (cont_f <= 5)) && ((cont_c >= 0) && (cont_c <= 1))) // Comprobar desde el lateral izquierdo
+            {
+                comprobar_arriba(jugador);
+                comprobar_abajo(jugador);
+                comprobar_derecha(jugador);
+                comprobar_arriba_derecha(jugador);
+                comprobar_abajo_derecha(jugador);
+            }
+
+            if (((cont_f >= 2) && (cont_f <= 5)) && ((cont_c >= 6) && (cont_c <= 7))) // Comprobar desde el lateral derecho
+            {
+                comprobar_arriba(jugador);
+                comprobar_abajo(jugador);
+                comprobar_izquierda(jugador);
+                comprobar_arriba_izquierda(jugador);
+                comprobar_abajo_izquierda(jugador);
+            }
+
+            if (((cont_f >= 0) && (cont_f <= 1)) && ((cont_c >= 2) && (cont_c <= 5))) // Comprobar desde el lateral superior
+            {
+                comprobar_abajo(jugador);
+                comprobar_derecha(jugador);
+                comprobar_izquierda(jugador);
+                comprobar_abajo_derecha(jugador);
+                comprobar_abajo_izquierda(jugador);
+            }
+
+            if (((cont_f >= 6) && (cont_f <= 7)) && ((cont_c >= 2) && (cont_c <= 5))) // Comprobar desde el lateral inferior
+            {
+                comprobar_arriba(jugador);
+                comprobar_derecha(jugador);
+                comprobar_izquierda(jugador);
+                comprobar_arriba_derecha(jugador);
+                comprobar_arriba_izquierda(jugador);
+            }
+
+            if (((cont_f >= 0) && (cont_f <= 1)) && ((cont_c >= 0) && (cont_c <= 1))) // Comprobar desde la esquina superior izquierda
+            {
+                comprobar_derecha(jugador);
+                comprobar_abajo(jugador);
+                comprobar_abajo_derecha(jugador);
+            }
+
+            if (((cont_f >= 6) && (cont_f <= 7)) && ((cont_c >= 0) && (cont_c <= 1))) // Comprobar desde la esquina inferior izquierda
+            {
+                comprobar_arriba(jugador);
+                comprobar_derecha(jugador);
+                comprobar_arriba_derecha(jugador);
+            }
+
+            if (((cont_f >= 0) && (cont_f <= 1)) && ((cont_c >= 6) && (cont_c <= 7))) // Comprobar desde la esquina superior derecha
+            {
+                comprobar_abajo(jugador);
+                comprobar_izquierda(jugador);
+                comprobar_abajo_izquierda(jugador);
+            }
+
+            if (((cont_f >= 6) && (cont_f <= 7)) && ((cont_c >= 6) && (cont_c <= 7))) // Comprobar desde la esquina inferior derecha
+            {
+                comprobar_arriba(jugador);
+                comprobar_izquierda(jugador);
+                comprobar_arriba_izquierda(jugador);
+            }
         }
         
         // Comprueba hacia arriba y cambia las fichas de color
