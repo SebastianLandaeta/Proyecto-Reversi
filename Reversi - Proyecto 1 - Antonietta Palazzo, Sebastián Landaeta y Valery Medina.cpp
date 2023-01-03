@@ -416,11 +416,11 @@ class Partida
 
             if (op == TRUE) // Se hará una colocación de posible jugada
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar
+                while ((aux_f > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
                 {
                     aux_f--;
 
-                    if ((aux_f >= 0) && (tabla[aux_f][aux_c] == VACIO)) // Si es posible colocar una posible jugada...
+                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
                     {
                         tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
                         break;
@@ -429,7 +429,7 @@ class Partida
             }
             else // Se hará un cambio de color de fichas
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar si hay al menos una ficha del color contrario para flanquear
+                while ((aux_f > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
                 {
                     aux_f--;
 
@@ -456,11 +456,11 @@ class Partida
             
             if (op == TRUE) // Se hará una colocación de posible jugada
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar
+                while ((aux_f < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
                 {
                     aux_f++;
 
-                    if ((aux_f <= 7) && (tabla[aux_f][aux_c] == VACIO)) // Si es posible colocar una posible jugada...
+                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
                     {
                         tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
                         break;
@@ -469,7 +469,7 @@ class Partida
             }
             else // Se hará un cambio de color de fichas
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar si hay al menos una ficha del color contrario para flanquear
+                while ((aux_f < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
                 {
                     aux_f++;
 
@@ -496,11 +496,11 @@ class Partida
 
             if (op == TRUE) // Se hará una colocación de posible jugada
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar
+                while ((aux_c > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
                 {
                     aux_c--;
 
-                    if ((aux_c >= 0) && (tabla[aux_f][aux_c] == VACIO)) // Si es posible colocar una posible jugada...
+                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
                     {
                         tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
                         break;
@@ -509,7 +509,7 @@ class Partida
             }
             else // Se hará un cambio de color de fichas
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar si hay al menos una ficha del color contrario para flanquear
+                while ((aux_c > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
                 {
                     aux_c--;
 
@@ -536,11 +536,11 @@ class Partida
 
             if (op == TRUE) // Se hará una colocación de posible jugada
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar
+                while ((aux_c < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
                 {
                     aux_c++;
 
-                    if ((aux_c <= 7) && (tabla[aux_f][aux_c] == VACIO)) // Si es posible colocar una posible jugada...
+                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
                     {
                         tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
                         break;
@@ -549,7 +549,7 @@ class Partida
             }
             else // Se hará un cambio de color de fichas
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar si hay al menos una ficha del color contrario para flanquear
+                while ((aux_c < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
                 {
                     aux_c++;
 
@@ -576,11 +576,11 @@ class Partida
             
             if (op == TRUE) // Se hará una colocación de posible jugada
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar
+                while (((aux_f > 0) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
                 {
                     aux_f--, aux_c++;
 
-                    if (((aux_f >= 0) && (aux_c <= 7)) && (tabla[aux_f][aux_c] == VACIO)) // Si es posible colocar una posible jugada...
+                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
                     {
                         tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
                         break;
@@ -589,7 +589,7 @@ class Partida
             }
             else // Se hará un cambio de color de fichas
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar si hay al menos una ficha del color contrario para flanquear
+                while (((aux_f > 0) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
                 {
                     aux_f--, aux_c++;
 
@@ -616,11 +616,11 @@ class Partida
 
             if (op == TRUE) // Se hará una colocación de posible jugada
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar
+                while (((aux_f < 7) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
                 {
                     aux_f++, aux_c++;
 
-                    if (((aux_f <= 7) && (aux_c <= 7)) && (tabla[aux_f][aux_c] == VACIO)) // Si es posible colocar una posible jugada...
+                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
                     {
                         tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
                         break;
@@ -629,7 +629,7 @@ class Partida
             }
             else // Se hará un cambio de color de fichas
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar
+                while (((aux_f < 7) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
                 {
                     aux_f++, aux_c++;
 
@@ -656,11 +656,11 @@ class Partida
 
             if (op == TRUE) // Se hará una colocación de posible jugada
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar
+                while (((aux_f > 0) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
                 {
                     aux_f--, aux_c--;
 
-                    if (((aux_f >= 0) && (aux_c >= 0)) && (tabla[aux_f][aux_c] == VACIO)) // Si es posible colocar una posible jugada...
+                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
                     {
                         tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
                         break;
@@ -669,7 +669,7 @@ class Partida
             }
             else // Se hará un cambio de color de fichas (debo asegurarme de que no cambie de color las fichas a no ser que haya una ficha de su color al final de la hilera)
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar
+                while (((aux_f > 0) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
                 {
                     aux_f--, aux_c--;
 
@@ -696,11 +696,11 @@ class Partida
 
             if (op == TRUE) // Se hará una colocación de posible jugada
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar
+                while (((aux_f < 7) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
                 {
                     aux_f++, aux_c--;
 
-                    if (((aux_f <= 7) && (aux_c >= 0)) && (tabla[aux_f][aux_c] == VACIO)) // Si es posible colocar una posible jugada...
+                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
                     {
                         tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
                         break;
@@ -709,7 +709,7 @@ class Partida
             }
             else // Se hará un cambio de color de fichas
             {
-                while ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA) // Comprobar
+                while (((aux_f < 7) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
                 {
                     aux_f++, aux_c--;
 
