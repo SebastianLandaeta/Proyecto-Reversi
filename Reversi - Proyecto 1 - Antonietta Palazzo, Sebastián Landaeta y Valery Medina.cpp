@@ -9,23 +9,38 @@
 */
 
 // == LIBRERIAS ==
-#include <cstdio>
-#include <ctime>
 #include <iostream>
 #include <string>
-#include <cstdlib>
-#include <clocale>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <locale.h>
 #include <windows.h>
 #include <conio.h>
+#include <math.h>
 
 // == MACROS ==
+
+// Simbolos que pueden estar en la tabla
 #define VACIO 0
 #define NEGRA 1
 #define BLANCA 2
 #define POSIBLE 3
 
+// Dimensiones del tablero
 #define FILAS 8
 #define COLUMNAS 8
+#define TOTAL FILAS * COLUMNAS
+
+// Tipos de retorno del método sin_jugadas()
+#define FIN 1
+#define PASAR 2
+#define CONTINUAR 3
+
+// Modo de juego
+#define JUGADOR_VS_JUGADOR 1
+#define JUGADOR_VS_CPU 2
+#define CPU_VS_CPU 3
 
 using namespace std;
 
@@ -51,6 +66,73 @@ class Utilidad
             dwPos.Y = Y;
             SetConsoleCursorPosition(hcon, dwPos);
         }
+
+        // Aumenta en uno el tamaño de un vector dinámico de enteros
+        void agrandar_vector_int(int *&n_cambios, int &longitud)
+        {
+            if (longitud == 0)
+            {
+                n_cambios = new int[1];
+                longitud++;
+                return;
+            }
+
+            longitud++;
+            
+            // Reservar espacio para el vector auxiliar
+            int *aux = new int[longitud];
+
+            // Copiar el contenido de n_cambios en aux
+            for (int i = 0; i < longitud-1; i++)
+            {
+                aux[i] = n_cambios[i];
+            }
+
+            // Borrar contenido de n_cambios
+            delete[] n_cambios;
+
+            // Copiar contenido de aux en n_cambios (incluyendo el espacio adicional)
+            n_cambios = aux;
+        }
+
+        void agrandar_matriz_int(int **&coord_posibles, int &filas)
+        {
+            if (filas == 0)
+            {
+                coord_posibles = new int*[1], coord_posibles[0] = new int[2], filas++;
+                return;
+            }
+            
+            filas++;
+
+            // Reservar espacio para la matriz auxiliar
+            int **aux = new int*[filas];
+
+            for (int i = 0; i < filas; i++)
+            {
+                aux[i] = new int[2];
+            }
+
+            // Copiar el contenido de coord_posibles en aux
+            for (int i = 0; i < filas-1; i++)
+            {
+                for (int j = 0; j < 2; j++)
+                {
+                    aux[i][j] = coord_posibles[i][j];
+                }
+            }
+
+            // Borrar contenido de coord_posibles
+            for (int i = 0; i < filas-1; i++)
+            {
+                delete[] coord_posibles[i];
+            }
+
+            delete[] coord_posibles;
+
+            // Copiar contenido de aux en coord_posibles (incluyendo el espacio adicional)
+            coord_posibles = aux;
+        }
 };
 
 // Contiene todos los datos de los jugadores
@@ -68,96 +150,706 @@ class Partida
 {
     // == ATRIBUTOS ==
     protected:
+        int modo;                   // Modo de juego
+        int *n_cambios;             // Almacena el número de fichas contrarias que se cambiarían al colocar una ficha propia en cada posible jugada
+        int **coord_posibles;       // Almacena las coordenadas en las que se encuentra cada posible jugada
+        int longitud = 0;           // Longitud del vector n_cambios
+        int filas = 0;              // Número de filas de la matriz coord_posibles
         int tabla[FILAS][COLUMNAS]; // Tablero de juego
-        bool turno = TRUE;          // Identifica a qué usuario le toca jugar
-        Jugador j1, j2;             // Jugadores de la partida
-        int n_turnos = 1;           // Cantidad de turnos
-        Utilidad utilidad;          // Objeto para dar estilo al juego
+        int n_turnos = 1;           // Número de turnos
+        int n_posibles = 0;         // Número de posibles jugadas en la tabla
+        int pasadas = 0;            // Si llega a dos, significará que ya no hay más jugadas posibles, por lo que el juego terminaría
         int cont_f = 0, cont_c = 0; // Coordenada fila y columna (se usan en la colocación de fichas)
         int x = 14, y = 4;          // Coordenada fila y columna (se usan para el gotoxy)
         int aux_f, aux_c;           // Coordenada fila y columna (se usan para el cambio de fichas y la colocación de posibles jugadas)
+        bool turno = TRUE;          // Identifica a qué usuario le toca jugar
         bool op;                    // Identifica si se hará un cambio de color de fichas (FALSE) o una colocación de posible jugada en la tabla (TRUE)
-        bool salir = FALSE;         // Indica si se ha terminado la partida (TRUE) o no (FALSE)
-
+        Jugador j1, j2;             // Jugadores de la partida 
+        Utilidad utilidad;          // Objeto para dar estilo y realizar ciertas tareas en el programa
+        
     // == MÉTODOS ==
     public:
         // Prepara la partida. El cómo lo hará dependerá del tipo de partida a jugar
         virtual void configuracion(){};
 
-        // Comienza la partida
-        void juego()
+        // Asigna nombres a los jugadores. Si el jugador es humano, pide su nombre por teclado
+        // Si es la máquina, se le asigna un nombre por defecto
+        virtual void inicializar_nombres(){};
+ 
+        // Comienza la partida según el modo de juego seleccionado
+        virtual void juego(){};
+
+        // Prepara la tabla para el inicio de una partida
+        void inicializar_tabla()
         {
-            char aux;
-            Jugador jugador;
-
-            do
+            // Inicializar tabla
+            for (int i = 0; i < FILAS; i++)
             {
-                turno == TRUE ? jugador = j1 : jugador = j2;
-                
-                op = TRUE; // Se van a colocar las posibles jugadas en la tabla
-
-                posibles_jugadas(jugador);
-
-                mostrar_tablero();
-                mostrar_jugador(jugador);
-
-                utilidad.gotoxy(x, y);    // Se coloca el cursor en la primera posición de la tabla
-
-                op = FALSE; // Se van a cambiar el color de fichas flanqueadas en la tabla
-
-                while (1) // Moverte por la tabla para realizar una jugada
+                for (int j = 0; j < COLUMNAS; j++)
                 {
-                    if (kbhit())
+                    tabla[i][j] = VACIO;
+                }
+            }
+            
+            // Colocar las fichas negras
+            tabla[3][4] = NEGRA, tabla[4][3] = NEGRA;
+
+            // Colocar las fichas blancas
+            tabla[3][3] = BLANCA, tabla[4][4] = BLANCA;
+        }
+        
+        // Elije aleatoriamente quien será el primer y segundo jugador (fichas negras y blancas, respectivamente)
+        void asignar_fichas()
+        {
+            // Semilla para el randomizer
+            srand(time(0));
+
+            // Elección aleatoria
+            int aleatorio = rand() % 2;
+
+            // Mostrar al primer jugador y asignar los colores de cada objeto Jugador
+            if (aleatorio == 0)
+            {
+                primer_jugador(j1, aleatorio);
+                turno = TRUE;
+                j1.color_fichas = NEGRA, j2.color_fichas = BLANCA;
+            }
+            else
+            {
+				primer_jugador(j2, aleatorio);
+                turno = FALSE;
+                j2.color_fichas = NEGRA, j1.color_fichas = BLANCA;
+            }
+        }
+
+        // Muestra quien será el primer jugador (fichas negras)
+        void primer_jugador(Jugador jugador, int aleatorio)
+        {
+            aleatorio == 0 ? utilidad.color(12) : utilidad.color(11);
+
+            utilidad.gotoxy(41, 12);
+            cout << jugador.nombre;
+            
+            utilidad.color(7);
+            cout << " será el primer jugador.\n";
+            
+            utilidad.color(8);
+            cout << "\n       ___________________________________________________________________________________________\n\n\t";
+            utilidad.color(7);
+            
+            system("pause");
+        }
+
+        // Coloca en la tabla las posibles jugadas que puede realizar un jugador en su turno
+        void posibles_jugadas(Jugador jugador)
+        {
+            // Se van a colocar las posibles jugadas en la tabla
+            op = TRUE;
+
+            // Busca las fichas del jugador correspondiente en la tabla
+            for (int i = 0; i < FILAS; i++)
+            {
+                for (int j = 0; j < COLUMNAS; j++)
+                {
+                    // Una vez encontrada una ficha, va a comprobar si es posible realizar una jugada en sus adyacencias
+                    if ((jugador.color_fichas == NEGRA) ? tabla[i][j] == NEGRA : tabla[i][j] == BLANCA)
                     {
-                        aux = getch();
+                        cont_f = i, cont_c = j;
+                        aux_f = cont_f, aux_c = cont_c;
+                        comprobaciones(jugador);
+                    }
+                }
+            }
 
-                        if (((int)aux == 72) && (y >= 5)) // Flecha arriba
+            cont_f = 0, cont_c = 0;
+        }
+
+        // Enlista todas las comprobaciones de movimiento, en función de la posición seleccionada por el usuario
+        void comprobaciones(Jugador jugador)
+        {
+            // Comprobar desde el centro
+            if (((cont_f >= 2) && (cont_f <= 5)) && ((cont_c >= 2) && (cont_c <= 5)))
+            {
+                comprobar_arriba(jugador);
+                comprobar_abajo(jugador);
+                comprobar_derecha(jugador);
+                comprobar_izquierda(jugador);
+                comprobar_arriba_derecha(jugador);
+                comprobar_arriba_izquierda(jugador);
+                comprobar_abajo_derecha(jugador);
+                comprobar_abajo_izquierda(jugador);
+                return;
+            }
+
+            // Comprobar desde el lateral izquierdo
+            if (((cont_f >= 2) && (cont_f <= 5)) && ((cont_c >= 0) && (cont_c <= 1)))
+            {
+                comprobar_arriba(jugador);
+                comprobar_abajo(jugador);
+                comprobar_derecha(jugador);
+                comprobar_arriba_derecha(jugador);
+                comprobar_abajo_derecha(jugador);
+                return;
+            }
+
+            // Comprobar desde el lateral derecho
+            if (((cont_f >= 2) && (cont_f <= 5)) && ((cont_c >= 6) && (cont_c <= 7)))
+            {
+                comprobar_arriba(jugador);
+                comprobar_abajo(jugador);
+                comprobar_izquierda(jugador);
+                comprobar_arriba_izquierda(jugador);
+                comprobar_abajo_izquierda(jugador);
+                return;
+            }
+
+            // Comprobar desde el lateral superior
+            if (((cont_f >= 0) && (cont_f <= 1)) && ((cont_c >= 2) && (cont_c <= 5)))
+            {
+                comprobar_abajo(jugador);
+                comprobar_derecha(jugador);
+                comprobar_izquierda(jugador);
+                comprobar_abajo_derecha(jugador);
+                comprobar_abajo_izquierda(jugador);
+                return;
+            }
+
+            // Comprobar desde el lateral inferior
+            if (((cont_f >= 6) && (cont_f <= 7)) && ((cont_c >= 2) && (cont_c <= 5)))
+            {
+                comprobar_arriba(jugador);
+                comprobar_derecha(jugador);
+                comprobar_izquierda(jugador);
+                comprobar_arriba_derecha(jugador);
+                comprobar_arriba_izquierda(jugador);
+                return;
+            }
+
+            // Comprobar desde la esquina superior izquierda
+            if (((cont_f >= 0) && (cont_f <= 1)) && ((cont_c >= 0) && (cont_c <= 1)))
+            {
+                comprobar_derecha(jugador);
+                comprobar_abajo(jugador);
+                comprobar_abajo_derecha(jugador);
+                return;
+            }
+
+            // Comprobar desde la esquina inferior izquierda
+            if (((cont_f >= 6) && (cont_f <= 7)) && ((cont_c >= 0) && (cont_c <= 1)))
+            {
+                comprobar_arriba(jugador);
+                comprobar_derecha(jugador);
+                comprobar_arriba_derecha(jugador);
+                return;
+            }
+
+            // Comprobar desde la esquina superior derecha
+            if (((cont_f >= 0) && (cont_f <= 1)) && ((cont_c >= 6) && (cont_c <= 7)))
+            {
+                comprobar_abajo(jugador);
+                comprobar_izquierda(jugador);
+                comprobar_abajo_izquierda(jugador);
+                return;
+            }
+
+            // Comprobar desde la esquina inferior derecha
+            if (((cont_f >= 6) && (cont_f <= 7)) && ((cont_c >= 6) && (cont_c <= 7)))
+            {
+                comprobar_arriba(jugador);
+                comprobar_izquierda(jugador);
+                comprobar_arriba_izquierda(jugador);
+                return;
+            }
+        }
+
+        // Comprueba hacia arriba para colocar posibles jugadas o cambiar fichas de color
+        void comprobar_arriba(Jugador jugador)
+        {
+            aux_f--;
+
+            if (op == TRUE) // Se hará una colocación de posible jugada
+            {
+                while ((aux_f > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
+                {
+                    aux_f--;
+                    
+                    if (insertar_posible() == TRUE) // Si se cumple esta condición, se inserta la posible jugada y se termina el ciclo
+                    {
+                        break;
+                    }
+                }
+            }
+            else // Se hará un cambio de color de fichas
+            {
+                while ((aux_f > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
+                {
+                    aux_f--;
+
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condición, se cambiarán de color todas las fichas posibles
+                    {
+                        aux_f++;
+                        
+                        while (aux_f != cont_f)
                         {
-                            y--;
-                            cont_f--;
-                            utilidad.gotoxy(x, y);
+                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA; 
+                            aux_f++;
                         }
+                    }                    
+                }
+            }
 
-                        if (((int)aux == 80) && (y <= 10)) // Flecha abajo
+            aux_f = cont_f;
+        }
+
+        // Comprueba hacia abajo para colocar posibles jugadas o cambiar fichas de color
+        void comprobar_abajo(Jugador jugador)
+        {
+            aux_f++;
+            
+            if (op == TRUE) // Se hará una colocación de posible jugada
+            {
+                while ((aux_f < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
+                {
+                    aux_f++;
+
+                    if (insertar_posible() == TRUE) // Si se cumple la condición, se inserta la posible jugada y se termina el ciclo
+                    {
+                        break;
+                    }
+                }
+            }
+            else // Se hará un cambio de color de fichas
+            {
+                while ((aux_f < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
+                {
+                    aux_f++;
+
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condición, se cambiarán de color todas las fichas posibles
+                    {
+                        aux_f--;
+
+                        while (aux_f != cont_f)
                         {
-                            y++;
-                            cont_f++;
-                            utilidad.gotoxy(x, y);
-                        }
-
-                        if (((int)aux == 75) && (x >= 15)) // Flecha izquierda
-                        {
-                            x -= 4;
-                            cont_c--;
-                            utilidad.gotoxy(x, y);
-                        }
-
-                        if (((int)aux == 77) && (x <= 41)) // Flecha derecha
-                        {
-                            x += 4;
-                            cont_c++;
-                            utilidad.gotoxy(x, y);
-                        }
-
-                        if ((int)aux == 13)               // Enter
-                        {
-                            aux_f = cont_f, aux_c = cont_c;
-
-                            if (jugada(jugador) == TRUE)
-                            {
-                                turno == TRUE ? j1.n_fichas++ : j2.n_fichas++;
-                                break;
-                            }
+                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA;
+                            aux_f--;
                         }
                     }
                 }
-                
-                turno = !turno;    // Se cambia de turno
-                n_turnos++;        // Aumenta el turno
-                x = 14, y = 4;     // En el siguiente turno se volverá a colocar el cursor en la primera posición de la tabla
-                borrar_posibles(); // Se borrarán las posibles jugadas para colocar las del otro jugador
+            }
 
-            } while (salir == FALSE);
+            aux_f = cont_f;
+        }
+
+        // Comprueba hacia la izquierda para colocar posibles jugadas o cambiar fichas de color
+        void comprobar_izquierda(Jugador jugador)
+        {
+            aux_c--;
+
+            if (op == TRUE) // Se hará una colocación de posible jugada
+            {
+                while ((aux_c > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
+                {
+                    aux_c--;
+
+                    if (insertar_posible() == TRUE) // Si se cumple la condición, se inserta la posible jugada y se termina el ciclo
+                    {
+                        break;
+                    }
+                }
+            }
+            else // Se hará un cambio de color de fichas
+            {
+                while ((aux_c > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
+                {
+                    aux_c--;
+
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condición, se cambiarán de color todas las fichas posibles
+                    {
+                        aux_c++;
+
+                        while (aux_c != cont_c)
+                        {
+                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA;
+                            aux_c++;
+                        }
+                    }
+                }
+            }
+
+            aux_c = cont_c;
+        }
+
+        // Comprueba hacia la derecha para colocar posibles jugadas o cambiar fichas de color
+        void comprobar_derecha(Jugador jugador)
+        {
+            aux_c++;
+
+            if (op == TRUE) // Se hará una colocación de posible jugada
+            {
+                while ((aux_c < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
+                {
+                    aux_c++;
+
+                    if (insertar_posible() == TRUE) // Si se cumple la condición, se inserta la posible jugada y se termina el ciclo
+                    {
+                        break;
+                    }
+                }
+            }
+            else // Se hará un cambio de color de fichas
+            {
+                while ((aux_c < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
+                {
+                    aux_c++;
+
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condición, se cambiarán de color todas las fichas posibles
+                    {
+                        aux_c--;
+
+                        while (aux_c != cont_c)
+                        {
+                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA;
+                            aux_c--;
+                        }
+                    }
+                }
+            }
+
+            aux_c = cont_c;
+        }
+        
+        // Comprueba diagonalmente hacia arriba a la derecha para colocar posibles jugadas o cambiar fichas de color
+        void comprobar_arriba_derecha(Jugador jugador)
+        {
+            aux_f--, aux_c++;
+            
+            if (op == TRUE) // Se hará una colocación de posible jugada
+            {
+                while (((aux_f > 0) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
+                {
+                    aux_f--, aux_c++;
+
+                    if (insertar_posible() == TRUE) // Si se cumple la condición, se inserta la posible jugada y se termina el ciclo
+                    {
+                        break;
+                    }
+                }
+            }
+            else // Se hará un cambio de color de fichas
+            {
+                while (((aux_f > 0) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
+                {
+                    aux_f--, aux_c++;
+
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condición, se cambiarán de color todas las fichas posibles
+                    {
+                        aux_f++, aux_c--;
+
+                        while ((aux_f != cont_f) && (aux_c != cont_c))
+                        {
+                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA;
+                            aux_f++, aux_c--;
+                        }
+                    }
+                }
+            }
+
+            aux_f = cont_f, aux_c = cont_c;
+        }
+
+        // Comprueba diagonalmente hacia abajo a la derecha para colocar posibles jugadas o cambiar fichas de color
+        void comprobar_abajo_derecha(Jugador jugador)
+        {
+            aux_f++, aux_c++;
+
+            if (op == TRUE) // Se hará una colocación de posible jugada
+            {
+                while (((aux_f < 7) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
+                {
+                    aux_f++, aux_c++;
+
+                    if (insertar_posible() == TRUE) // Si se cumple la condición, se inserta la posible jugada y se termina el ciclo
+                    {
+                        break;
+                    }
+                }
+            }
+            else // Se hará un cambio de color de fichas
+            {
+                while (((aux_f < 7) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
+                {
+                    aux_f++, aux_c++;
+
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condición, se cambiarán de color todas las fichas posibles
+                    {
+                        aux_f--, aux_c--;
+
+                        while ((aux_f != cont_f) && (aux_c != cont_c))
+                        {
+                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA;
+                            aux_f--, aux_c--;
+                        }
+                    }
+                }
+            }
+
+            aux_f = cont_f, aux_c = cont_c;
+        }
+
+        // Comprueba diagonalmente hacia arriba a la izquierda para colocar posibles jugadas o cambiar fichas de color
+        void comprobar_arriba_izquierda(Jugador jugador)
+        {
+            aux_f--, aux_c--;
+
+            if (op == TRUE) // Se hará una colocación de posible jugada
+            {
+                while (((aux_f > 0) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
+                {
+                    aux_f--, aux_c--;
+
+                    if (insertar_posible() == TRUE) // Si se cumple la condición, se inserta la posible jugada y se termina el ciclo
+                    {
+                        break;
+                    }
+                }
+            }
+            else // Se hará un cambio de color de fichas
+            {
+                while (((aux_f > 0) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
+                {
+                    aux_f--, aux_c--;
+
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condición, se cambiarán de color todas las fichas posibles
+                    {
+                        aux_f++, aux_c++;
+
+                        while ((aux_f != cont_f) && (aux_c != cont_c))
+                        {
+                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA;
+                            aux_f++, aux_c++;
+                        }
+                    }
+                }
+            }
+
+            aux_f = cont_f, aux_c = cont_c;
+        }
+
+        // Comprueba diagonalmente hacia abajo a la izquierda para colocar posibles jugadas o cambiar fichas de color
+        void comprobar_abajo_izquierda(Jugador jugador)
+        {
+            aux_f++, aux_c--;
+
+            if (op == TRUE) // Se hará una colocación de posible jugada
+            {
+                while (((aux_f < 7) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
+                {
+                    aux_f++, aux_c--;
+
+                    if (insertar_posible() == TRUE) // Si se cumple la condición, se inserta la posible jugada y se termina el ciclo
+                    {
+                        break;
+                    }
+                }
+            }
+            else // Se hará un cambio de color de fichas
+            {
+                while (((aux_f < 7) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
+                {
+                    aux_f++, aux_c--;
+
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condición, se cambiarán de color todas las fichas posibles
+                    {
+                        aux_f--, aux_c++;
+
+                        while ((aux_f != cont_f) && (aux_c != cont_c))
+                        {
+                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA;
+                            aux_f--, aux_c++;
+                        }
+                    }
+                }
+            }
+
+            aux_f = cont_f, aux_c = cont_c;
+        }
+
+        // Comprobar si se puede insertar una posible jugada en la tabla
+        bool insertar_posible()
+        {
+            // Si hay un espacio vacío...
+            if (tabla[aux_f][aux_c] == VACIO)
+            {
+                tabla[aux_f][aux_c] = POSIBLE; // Colocar la posible jugada
+                n_posibles++;                  // Incrementar el número de posibles jugadas en la tabla
+
+                // Si estamos en un modo de juego con máquina...
+                if ((modo == JUGADOR_VS_CPU) || (modo == CPU_VS_CPU))
+                {
+                    // Incrementar el tamaño de n_cambios y coord_posibles
+                    utilidad.agrandar_vector_int(n_cambios, longitud);
+                    utilidad.agrandar_matriz_int(coord_posibles, filas);
+                            
+                    // Insertar las coordenadas de la posible jugada en la matriz
+                    coord_posibles[filas-1][0] = aux_f, coord_posibles[filas-1][1] = aux_c;
+
+                    // Insertar el número de fichas que se cambiarían al realizar la jugada
+                    n_cambios[longitud-1] = calcular_cambios();
+                }
+
+                return TRUE;
+            }
+
+            return FALSE;
+        }
+
+        // Calcular el número de fichas que se cambiarían al realizar la jugada
+        int calcular_cambios()
+        {
+            // Cuando el cambio de fichas es vertical o diagonal
+            if (((aux_f != cont_f) && (aux_c == cont_c)) || ((aux_f != cont_f) && (aux_c != cont_c)))
+            {
+                return abs(aux_f - cont_f) - 1;
+            }
+            // Cuando el cambio de fichas es horizontal
+            else if ((aux_f == cont_f) && (aux_c != cont_c))
+            {
+                return abs(aux_c - cont_c) - 1;
+            }
+        }
+
+        // Comprueba si hay jugadas posibles en el turno y contiene una condición de fin de partida
+        int sin_jugadas()
+        {
+            // Si no hay jugadas posibles...
+            if (n_posibles == 0)
+            {
+                pasadas++; // Se pasa de turno
+
+                if (pasadas == 2) // Condición de fin de partida si ningun jugador puede realizar más movimientos
+                {
+                    mostrar_tablero();
+                    mostrar_ganador();
+                    mostrar_resultados();
+                    return FIN;
+                }
+                else // Si aún no se cumple la condición de fin de partida...
+                {
+                    utilidad.gotoxy(0, 16);
+                    utilidad.color(6);
+                    cout << "\tNo puedes realizar ninguna jugada, por lo que se le cederá el turno al siguiente jugador\n";
+                    utilidad.color(7);
+                    cout << "\n       ___________________________________________________________________________________________\n\n\t";
+                    system("pause");
+                    return PASAR;
+                }
+            }
+
+            return CONTINUAR;
+        }
+
+        // Muestra al ganador de la partida, o si hay un empate
+        void mostrar_ganador()
+        {
+            for (int i = 3; i < 13; i++)
+            {
+                utilidad.gotoxy(54, i);
+                cout << "|";
+            }
+
+            utilidad.gotoxy(68, 3);
+            utilidad.color(12);
+            cout << "= PARTIDA  TERMINADA =";
+
+            if ((j1.n_fichas > j2.n_fichas) || (j1.n_fichas < j2.n_fichas)) // Si hubo un ganador...
+            {
+                utilidad.gotoxy(68, 6);
+                utilidad.color(14);
+                cout << "* +  FELICIDADES  + *";
+
+                utilidad.gotoxy(78 - ((j1.n_fichas > j2.n_fichas ? j1.nombre.length() : j2.nombre.length())/2), 9);
+                utilidad.color(7);
+                cout << (j1.n_fichas > j2.n_fichas ? j1.nombre : j2.nombre);
+
+                utilidad.gotoxy(69, 12);
+                utilidad.color(14);
+                cout << ".*+ HAS  GANADO +*.";
+
+                utilidad.color(7);
+            }
+            else // Si hubo un empate...
+            {
+                utilidad.gotoxy(72, 7);
+                utilidad.color(14);
+                cout << "* + EMPATE + *";
+                utilidad.gotoxy(69, 11);
+                utilidad.color(7);
+                cout << ".*+ NO HAY GANADOR +*.";
+            }
+            
+            utilidad.gotoxy(0, 16);
+        }
+
+        // Muestra el resultado de la partida
+        void mostrar_resultados()
+        {
+            utilidad.color(12);
+
+            utilidad.gotoxy(28, 16);
+            cout << "Jugador 1:" << endl;
+            utilidad.color(7);
+
+            utilidad.gotoxy(15, 18);
+            cout << "Nombre: ";
+            utilidad.color(12);
+            cout<< j1.nombre << endl;
+            utilidad.color(7);
+
+            utilidad.gotoxy(15,20);
+            cout << "Color de Fichas: ";
+            utilidad.color(12);
+            cout << (j1.color_fichas == NEGRA ? "Negras" : "Blancas") << endl;
+            utilidad.color(7);
+
+            utilidad.gotoxy(15,22);
+            cout << "Número de Fichas: ";
+            utilidad.color(12);
+            cout << j1.n_fichas << endl;
+            utilidad.color(7);
+
+            for (int Y = 16; Y < 24; Y++)
+            {
+                utilidad.gotoxy(54, Y);
+                cout << "|";
+            }
+
+            utilidad.color(11);
+
+            utilidad.gotoxy(74, 16);
+            cout << "Jugador 2: " << endl;
+            utilidad.color(7);
+
+            utilidad.gotoxy(61, 18);
+            cout << "Nombre: " ;
+            utilidad.color(11);
+            cout<< j2.nombre << endl;
+            utilidad.color(7);
+            
+            utilidad.gotoxy(61, 20);
+            cout << "Color de Fichas: " ;
+            utilidad.color(11);
+            cout<< (j2.color_fichas == NEGRA ? "Negras" : "Blancas") << endl;
+            utilidad.color(7);
+
+            utilidad.gotoxy(61,22);
+            cout << "Número de Fichas: ";
+            utilidad.color(11);
+            cout<< j2.n_fichas << endl;
+            utilidad.color(7);
+
+
+            cout << "\n\n       ___________________________________________________________________________________________\n\n\t";
+            system("pause");
         }
 
         // Muestra el tablero de juego
@@ -188,9 +880,9 @@ class Partida
                     utilidad.color(32);
                     cout << "|";
 
-                    if (tabla[i][j] == VACIO)
+                    if (tabla[i][j] == VACIO) // Condición para mostrar los espacios vacíos
                     {
-                        cout << "   ";  // Condición para mostrar los espacios vacíos
+                        cout << "   ";
                     }                
                     
                     if (tabla[i][j] == NEGRA) // Condición para mostrar las fichas negras
@@ -223,22 +915,6 @@ class Partida
             utilidad.color(7);
 
             cout << "\n\n       ___________________________________________________________________________________________\n\n";
-        }
-
-        // Muestra quien será el primer jugador (fichas negras)
-        void primer_jugador(Jugador jugador)
-        {
-            utilidad.gotoxy(41,12);
-            cout << jugador.nombre;
-            
-            utilidad.color(7);
-            cout << " será el primer jugador.\n";
-            
-            utilidad.color(8);
-            cout << "\n       ___________________________________________________________________________________________\n\n\t";
-            utilidad.color(7);
-            
-            system("pause");
         }
 
         // Muestra la información del jugador en pantalla
@@ -281,452 +957,171 @@ class Partida
 
             utilidad.gotoxy(6, 16);
         }
-        
-        // Coloca en la tabla las posibles jugadas que puede realizar un jugador en su turno
-        void posibles_jugadas(Jugador jugador)
+
+        // Le permite a un humano realizar una jugada (Este método se usa en los modos Jugador vs Jugador y Jugador vs CPU)
+        void jugada_humana(Jugador jugador)
         {
-            for (int i = 0; i < FILAS; i++) // Buscar las fichas negras en la tabla
+            char aux;
+
+            utilidad.gotoxy(x, y); // Colocar el cursor en la primera posición de la tabla
+
+            while (1) // Moverse por la tabla para realizar una jugada
             {
-                for (int j = 0; j < COLUMNAS; j++)
+                if (kbhit())
                 {
-                    if ((jugador.color_fichas == NEGRA) ? tabla[i][j] == NEGRA : tabla[i][j] == BLANCA) // Se almacena la posición de la ficha
+                    aux = getch();
+
+                    if (((int)aux == 72) && (y >= 5)) // Flecha arriba
                     {
-                        cont_f = i, cont_c = j;
+                        y--;
+                        cont_f--;
+                        utilidad.gotoxy(x, y);
+                    }
+
+                    if (((int)aux == 80) && (y <= 10)) // Flecha abajo
+                    {
+                        y++;
+                        cont_f++;
+                        utilidad.gotoxy(x, y);
+                    }
+
+                    if (((int)aux == 75) && (x >= 15)) // Flecha izquierda
+                    {
+                        x -= 4;
+                        cont_c--;
+                        utilidad.gotoxy(x, y);
+                    }
+
+                    if (((int)aux == 77) && (x <= 41)) // Flecha derecha
+                    {
+                        x += 4;
+                        cont_c++;
+                        utilidad.gotoxy(x, y);
+                    }
+
+                    if ((int)aux == 13) // Enter
+                    {
                         aux_f = cont_f, aux_c = cont_c;
-                        comprobaciones(jugador);
+
+                        if (validar_jugada(jugador) == TRUE) // Si se valida la jugada...
+                        {
+                            contar_fichas(); // Se actualizan los puntos de los jugadores
+                            break;
+                        }
                     }
                 }
             }
-
-            cont_f = 0, cont_c = 0;
         }
 
-        // Comprueba si puedes realizar la jugada deseada o no, y en caso de poder, la hace
-        bool jugada(Jugador jugador)
+        // Le permite a la maquina realizar una jugada (Este método se usa en los modos CPU vs CPU y Jugador vs CPU)
+        void jugada_maquina(Jugador jugador)
         {
+            op = FALSE; // Van a cambiar el color de fichas flanqueadas en la tabla
+
+            // Elegir la posible jugada que más fichas le dará a la máquina
+            int r = n_cambios[0];
+            cont_f = coord_posibles[0][0], cont_c = coord_posibles[0][1];
+
+            for (int i = 0; i < longitud; i++)
+            {
+                if (r < n_cambios[i])
+                {
+                    r = n_cambios[i];
+
+                    cont_f = coord_posibles[i][0], cont_c = coord_posibles[i][1];
+                }
+            }
+            
+            utilidad.gotoxy(0, 16);
+            
+            Sleep(3000);
+
+            // Una vez elegida la mejor jugada, el programa procede a realizarla
+            jugador.color_fichas == NEGRA ? tabla[cont_f][cont_c] = NEGRA : tabla[cont_f][cont_c] = BLANCA;
+
+            aux_f = cont_f, aux_c = cont_c;
+
+            comprobaciones(jugador);
+            contar_fichas();
+        }
+
+        // Comprueba si la jugada realizada es válida o no (método usado unicamente cuando la jugada es de un humano)
+        bool validar_jugada(Jugador jugador)
+        {
+            op = FALSE; // Se van a cambiar el color de fichas flanqueadas en la tabla
+
             if (tabla[cont_f][cont_c] == POSIBLE) // Si es posible realizar la jugada...
             {
                 jugador.color_fichas == NEGRA ? tabla[cont_f][cont_c] = NEGRA : tabla[cont_f][cont_c] = BLANCA;
-
+                
                 comprobaciones(jugador);
                 return TRUE;
             }
             else // Si no es posible realizar la jugada...
             {
                 utilidad.gotoxy(0, 16);
-                cout << "El movimiento que desea realizar no es válido. Por favor, intentelo de nuevo.\n";
-                system("pause");
+                cout << "El movimiento que desea realizar no es válido. Por favor, inténtelo de nuevo.\n";
+                utilidad.gotoxy(x, y);
                 return FALSE;
             }
         }
         
-        // Enlista todas las comprobaciones de movimiento en función de la posición en la tabla seleccionada por el usuario
-        void comprobaciones(Jugador jugador)
+        // Cuenta el número de fichas blancas y negras que hay en el tablero
+        void contar_fichas()
         {
-            if (((cont_f >= 2) && (cont_f <= 5)) && ((cont_c >= 2) && (cont_c <= 5))) // Comprobar desde el centro
-            {
-                comprobar_arriba(jugador);
-                comprobar_abajo(jugador);
-                comprobar_derecha(jugador);
-                comprobar_izquierda(jugador);
-                comprobar_arriba_derecha(jugador);
-                comprobar_arriba_izquierda(jugador);
-                comprobar_abajo_derecha(jugador);
-                comprobar_abajo_izquierda(jugador);
-                return;
-            }
+            int negras = 0, blancas = 0;
 
-            if (((cont_f >= 2) && (cont_f <= 5)) && ((cont_c >= 0) && (cont_c <= 1))) // Comprobar desde el lateral izquierdo
+            for (int i = 0; i < FILAS; i++)
             {
-                comprobar_arriba(jugador);
-                comprobar_abajo(jugador);
-                comprobar_derecha(jugador);
-                comprobar_arriba_derecha(jugador);
-                comprobar_abajo_derecha(jugador);
-                return;
-            }
-
-            if (((cont_f >= 2) && (cont_f <= 5)) && ((cont_c >= 6) && (cont_c <= 7))) // Comprobar desde el lateral derecho
-            {
-                comprobar_arriba(jugador);
-                comprobar_abajo(jugador);
-                comprobar_izquierda(jugador);
-                comprobar_arriba_izquierda(jugador);
-                comprobar_abajo_izquierda(jugador);
-                return;
-            }
-
-            if (((cont_f >= 0) && (cont_f <= 1)) && ((cont_c >= 2) && (cont_c <= 5))) // Comprobar desde el lateral superior
-            {
-                comprobar_abajo(jugador);
-                comprobar_derecha(jugador);
-                comprobar_izquierda(jugador);
-                comprobar_abajo_derecha(jugador);
-                comprobar_abajo_izquierda(jugador);
-                return;
-            }
-
-            if (((cont_f >= 6) && (cont_f <= 7)) && ((cont_c >= 2) && (cont_c <= 5))) // Comprobar desde el lateral inferior
-            {
-                comprobar_arriba(jugador);
-                comprobar_derecha(jugador);
-                comprobar_izquierda(jugador);
-                comprobar_arriba_derecha(jugador);
-                comprobar_arriba_izquierda(jugador);
-                return;
-            }
-
-            if (((cont_f >= 0) && (cont_f <= 1)) && ((cont_c >= 0) && (cont_c <= 1))) // Comprobar desde la esquina superior izquierda
-            {
-                comprobar_derecha(jugador);
-                comprobar_abajo(jugador);
-                comprobar_abajo_derecha(jugador);
-                return;
-            }
-
-            if (((cont_f >= 6) && (cont_f <= 7)) && ((cont_c >= 0) && (cont_c <= 1))) // Comprobar desde la esquina inferior izquierda
-            {
-                comprobar_arriba(jugador);
-                comprobar_derecha(jugador);
-                comprobar_arriba_derecha(jugador);
-                return;
-            }
-
-            if (((cont_f >= 0) && (cont_f <= 1)) && ((cont_c >= 6) && (cont_c <= 7))) // Comprobar desde la esquina superior derecha
-            {
-                comprobar_abajo(jugador);
-                comprobar_izquierda(jugador);
-                comprobar_abajo_izquierda(jugador);
-                return;
-            }
-
-            if (((cont_f >= 6) && (cont_f <= 7)) && ((cont_c >= 6) && (cont_c <= 7))) // Comprobar desde la esquina inferior derecha
-            {
-                comprobar_arriba(jugador);
-                comprobar_izquierda(jugador);
-                comprobar_arriba_izquierda(jugador);
-                return;
-            }
-        }
-        
-        // Comprueba hacia arriba para colocar posibles jugadas o cambiar fichas de color
-        void comprobar_arriba(Jugador jugador)
-        {
-            aux_f--;
-
-            if (op == TRUE) // Se hará una colocación de posible jugada
-            {
-                while ((aux_f > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
+                for (int j = 0; j < COLUMNAS; j++)
                 {
-                    aux_f--;
-
-                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
+                    if (tabla[i][j] == NEGRA)
                     {
-                        tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
-                        break;
+                        negras++;
+                    }
+                    else if (tabla[i][j] == BLANCA)
+                    {
+                        blancas++;
                     }
                 }
             }
-            else // Se hará un cambio de color de fichas
-            {
-                while ((aux_f > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
-                {
-                    aux_f--;
 
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA)
-                    {
-                        aux_f++;
-
-                        while (aux_f != cont_f)
-                        {
-                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA; 
-                            aux_f++;
-                        }
-                    }                    
-                }
-            }
-
-            aux_f = cont_f;
+            (j1.color_fichas == NEGRA) ? (j1.n_fichas = negras, j2.n_fichas = blancas) : (j2.n_fichas = negras, j1.n_fichas = blancas);
         }
 
-        // Comprueba hacia abajo para colocar posibles jugadas o cambiar fichas de color
-        void comprobar_abajo(Jugador jugador)
+        // Condición de fin de partida si la tabla se llena
+        bool tabla_llena()
         {
-            aux_f++;
-            
-            if (op == TRUE) // Se hará una colocación de posible jugada
+            if ((j1.n_fichas + j2.n_fichas) == TOTAL)
             {
-                while ((aux_f < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
-                {
-                    aux_f++;
-
-                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
-                    {
-                        tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
-                        break;
-                    }
-                }
-            }
-            else // Se hará un cambio de color de fichas
-            {
-                while ((aux_f < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
-                {
-                    aux_f++;
-
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA)
-                    {
-                        aux_f--;
-
-                        while (aux_f != cont_f)
-                        {
-                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA;
-                            aux_f--;
-                        }
-                    }
-                }
+                mostrar_tablero();
+                mostrar_ganador();
+                mostrar_resultados();
+                return TRUE;
             }
 
-            aux_f = cont_f;
+            return FALSE;
         }
 
-        // Comprueba hacia la izquierda para colocar posibles jugadas o cambiar fichas de color
-        void comprobar_izquierda(Jugador jugador)
+        // Hace operaciones necesarias antes de que el turno del siguiente jugador empiece
+        void finalizar_turno()
         {
-            aux_c--;
+            turno = !turno;                   // Se cambia de turno
+            longitud = 0, filas = 0;          // Reiniciar estos
+            n_turnos++;                       // Aumenta el turno
+            pasadas = 0;                      // La racha de pasadas se termina
+            n_posibles = 0;                   // Se reinicia el número de posibles jugadas
+            x = 14, y = 4;                    // En el siguiente turno se volverá a colocar el cursor en la primera posición de la tabla
+            borrar_posibles();                // Se borrarán las posibles jugadas para colocar las del otro jugador
 
-            if (op == TRUE) // Se hará una colocación de posible jugada
+            delete[] n_cambios;               // Liberar el espacio de n_cambios
+
+            for (int i = 0; i < filas-1; i++) // Liberar espacio de coord_posibles
             {
-                while ((aux_c > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
-                {
-                    aux_c--;
-
-                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
-                    {
-                        tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
-                        break;
-                    }
-                }
-            }
-            else // Se hará un cambio de color de fichas
-            {
-                while ((aux_c > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
-                {
-                    aux_c--;
-
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA)
-                    {
-                        aux_c++;
-
-                        while (aux_c != cont_c)
-                        {
-                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA;
-                            aux_c++;
-                        }
-                    }
-                }
+                delete[] coord_posibles[i];
             }
 
-            aux_c = cont_c;
-        }
-
-        // Comprueba hacia la derecha para colocar posibles jugadas o cambiar fichas de color
-        void comprobar_derecha(Jugador jugador)
-        {
-            aux_c++;
-
-            if (op == TRUE) // Se hará una colocación de posible jugada
-            {
-                while ((aux_c < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
-                {
-                    aux_c++;
-
-                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
-                    {
-                        tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
-                        break;
-                    }
-                }
-            }
-            else // Se hará un cambio de color de fichas
-            {
-                while ((aux_c < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
-                {
-                    aux_c++;
-
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA)
-                    {
-                        aux_c--;
-
-                        while (aux_c != cont_c)
-                        {
-                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA;
-                            aux_c--;
-                        }
-                    }
-                }
-            }
-
-            aux_c = cont_c;
-        }
-        
-        // Comprueba diagonalmente hacia arriba a la derecha para colocar posibles jugadas o cambiar fichas de color
-        void comprobar_arriba_derecha(Jugador jugador)
-        {
-            aux_f--, aux_c++;
-            
-            if (op == TRUE) // Se hará una colocación de posible jugada
-            {
-                while (((aux_f > 0) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
-                {
-                    aux_f--, aux_c++;
-
-                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
-                    {
-                        tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
-                        break;
-                    }
-                }
-            }
-            else // Se hará un cambio de color de fichas
-            {
-                while (((aux_f > 0) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
-                {
-                    aux_f--, aux_c++;
-
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA)
-                    {
-                        aux_f++, aux_c--;
-
-                        while ((aux_f != cont_f) && (aux_c != cont_c))
-                        {
-                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA;
-                            aux_f++, aux_c--;
-                        }
-                    }
-                }
-            }
-
-            aux_f = cont_f, aux_c = cont_c;
-        }
-
-        // Comprueba diagonalmente hacia abajo a la derecha para colocar posibles jugadas o cambiar fichas de color
-        void comprobar_abajo_derecha(Jugador jugador)
-        {
-            aux_f++, aux_c++;
-
-            if (op == TRUE) // Se hará una colocación de posible jugada
-            {
-                while (((aux_f < 7) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
-                {
-                    aux_f++, aux_c++;
-
-                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
-                    {
-                        tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
-                        break;
-                    }
-                }
-            }
-            else // Se hará un cambio de color de fichas
-            {
-                while (((aux_f < 7) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
-                {
-                    aux_f++, aux_c++;
-
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA)
-                    {
-                        aux_f--, aux_c--;
-
-                        while ((aux_f != cont_f) && (aux_c != cont_c))
-                        {
-                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA;
-                            aux_f--, aux_c--;
-                        }
-                    }
-                }
-            }
-
-            aux_f = cont_f, aux_c = cont_c;
-        }
-
-        // Comprueba diagonalmente hacia arriba a la izquierda para colocar posibles jugadas o cambiar fichas de color
-        void comprobar_arriba_izquierda(Jugador jugador)
-        {
-            aux_f--, aux_c--;
-
-            if (op == TRUE) // Se hará una colocación de posible jugada
-            {
-                while (((aux_f > 0) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
-                {
-                    aux_f--, aux_c--;
-
-                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
-                    {
-                        tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
-                        break;
-                    }
-                }
-            }
-            else // Se hará un cambio de color de fichas (debo asegurarme de que no cambie de color las fichas a no ser que haya una ficha de su color al final de la hilera)
-            {
-                while (((aux_f > 0) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
-                {
-                    aux_f--, aux_c--;
-
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA)
-                    {
-                        aux_f++, aux_c++;
-
-                        while ((aux_f != cont_f) && (aux_c != cont_c))
-                        {
-                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA;
-                            aux_f++, aux_c++;
-                        }
-                    }
-                }
-            }
-
-            aux_f = cont_f, aux_c = cont_c;
-        }
-
-        // Comprueba diagonalmente hacia abajo a la izquierda para colocar posibles jugadas o cambiar fichas de color
-        void comprobar_abajo_izquierda(Jugador jugador)
-        {
-            aux_f++, aux_c--;
-
-            if (op == TRUE) // Se hará una colocación de posible jugada
-            {
-                while (((aux_f < 7) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
-                {
-                    aux_f++, aux_c--;
-
-                    if (tabla[aux_f][aux_c] == VACIO) // Si es posible colocar una posible jugada...
-                    {
-                        tabla[aux_f][aux_c] = POSIBLE; // Se coloca la posible jugada y se termina el ciclo
-                        break;
-                    }
-                }
-            }
-            else // Se hará un cambio de color de fichas
-            {
-                while (((aux_f < 7) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar
-                {
-                    aux_f++, aux_c--;
-
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA)
-                    {
-                        aux_f--, aux_c++;
-
-                        while ((aux_f != cont_f) && (aux_c != cont_c))
-                        {
-                            (jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] = NEGRA : tabla[aux_f][aux_c] = BLANCA;
-                            aux_f--, aux_c++;
-                        }
-                    }
-                }
-            }
-
-            aux_f = cont_f, aux_c = cont_c;
+            delete[] coord_posibles;
         }
 
         // Borra de la tabla las posibles jugadas (los "?")
@@ -745,36 +1140,27 @@ class Partida
         }
 };
 
+// Clase hija de Partida. Es el modo de juego Jugador vs Jugador
 class Jugador_vs_Jugador : public Partida
 {        
     public:
         // Prepara la partida para dos jugadores humanos
         void configuracion()
         {
-            // Semilla para el randomizer
-            srand(time(0));
+            // Indicar el modo de juego
+            modo = JUGADOR_VS_JUGADOR;
             
             // Inicializar contadores de fichas
             j1.n_fichas = 2, j2.n_fichas = 2;
-            
-            // Inicializar tabla
-            for (int i = 0; i < FILAS; i++)
-            {
-                for (int j = 0; j < COLUMNAS; j++)
-                {
-                    tabla[i][j] = VACIO;
-                }
-            }
 
-            // Colocar las fichas negras
-            tabla[3][4] = NEGRA;
-            tabla[4][3] = NEGRA;
+            inicializar_tabla();
+            inicializar_nombres();
+            asignar_fichas();
+        }
 
-            // Colocar las fichas blancas
-            tabla[3][3] = BLANCA;
-            tabla[4][4] = BLANCA;
-                
-            // Pedir los nombres de los jugadores
+        // Pedir los nombres de los dos jugadores
+        void inicializar_nombres()
+        {
             utilidad.color(8);
             cout << "       ___________________________________________________________________________________________\n\n\n";
             
@@ -794,27 +1180,192 @@ class Jugador_vs_Jugador : public Partida
 			utilidad.color(7);
 			cout << ": ";
             getline(cin, j2.nombre);
+        }
 
-            // Elegir aleatoriamente quien será el primer jugador (fichas negras)
-            int aleatorio = rand()%2;
+        // Comienza la partida de Jugador vs Jugador
+        void juego()
+        {
+            Jugador jugador;
 
-            // Mostrar quien será el primer jugador (fichas negras)
-            if (aleatorio == 0)
+            do
             {
-                utilidad.color(12);
-                primer_jugador(j1);
-                turno = TRUE;
-                j1.color_fichas = NEGRA;
-                j2.color_fichas = BLANCA;
-            }
-            else
+                turno == TRUE ? jugador = j1 : jugador = j2;
+
+                posibles_jugadas(jugador);
+
+                int respuesta = sin_jugadas();
+
+                if (respuesta == FIN)
+                {
+                    break;
+                }
+                else if (respuesta == PASAR)
+                {
+                    continue;
+                }
+                else if (respuesta == CONTINUAR)
+                {
+                    mostrar_tablero();
+                    mostrar_jugador(jugador);
+                    jugada_humana(jugador);
+
+                    if (tabla_llena() == TRUE)
+                    {
+                        break;
+                    }
+
+                    finalizar_turno();
+                }
+            } while (1);
+        }
+};
+
+// Clase hija de Partida. Es el modo de juego Jugador vs CPU
+class Jugador_vs_CPU : public Partida
+{
+    public:
+        // Prepara la partida para un jugador humano y uno controlado por la máquina
+        void configuracion()
+        {
+            // Indicar el modo de juego
+            modo = JUGADOR_VS_CPU;
+            
+            // Inicializar contadores de fichas
+            j1.n_fichas = 2, j2.n_fichas = 2;
+
+            inicializar_tabla();
+            inicializar_nombres();
+            asignar_fichas();
+        }
+
+        // Pide el nombre del jugador humano y le asigna uno por defecto a la máquina
+        void inicializar_nombres()
+        {
+            utilidad.color(8);
+            cout << "       ___________________________________________________________________________________________\n\n\n";
+            
+            utilidad.color(7);
+	        cout << "\t\t\t         = INGRESE SU NOMBRE =\n\n\n";
+             
+            cout << "\t\t\t---> ";
+            utilidad.color(12);
+		    cout << "Jugador";
+		    utilidad.color(7);
+		    cout << ": ";
+            getline(cin, j1.nombre);
+
+            j2.nombre = "CPU";
+        }
+
+        void juego()
+        {
+            Jugador jugador;
+
+            do
             {
-                utilidad.color(11);
-				primer_jugador(j2);
-                turno = FALSE;
-                j2.color_fichas = NEGRA;
-                j1.color_fichas = BLANCA;
+                turno == TRUE ? jugador = j1 : jugador = j2;
+
+                // El problema es aqui
+                posibles_jugadas(jugador);
+
+                int respuesta = sin_jugadas();
+
+                if (respuesta == FIN)
+                {
+                    break;
+                }
+                else if (respuesta == PASAR)
+                {
+                    continue;
+                }
+                else if (respuesta == CONTINUAR)
+                {
+                    mostrar_tablero();
+                    mostrar_jugador(jugador);
+                    identificar_jugador(jugador);
+
+                    if (tabla_llena() == TRUE)
+                    {
+                        break;
+                    }
+
+                    utilidad.gotoxy(0, 16);
+
+                    finalizar_turno();
+                }
+            } while (1);
+        }
+
+        void identificar_jugador(Jugador jugador)
+        {
+            if (jugador.nombre == "CPU") // Si se cumple, el jugador es la máquina
+            {
+                jugada_maquina(jugador);
             }
+            else // Sino, el jugador es humano
+            {
+                jugada_humana(jugador);
+            }
+        }
+};
+
+// Clase hija de Partida. Es el modo de juego CPU vs CPU
+class CPU_vs_CPU : public Partida
+{
+    public:
+        // Prepara la partida para dos jugadores controlador por la máquina
+        void configuracion()
+        {
+            // Indicar el modo de juego
+            modo = CPU_VS_CPU;
+            
+            // Inicializar contadores de fichas
+            j1.n_fichas = 2, j2.n_fichas = 2;
+
+            inicializar_tabla();
+            inicializar_nombres();
+            asignar_fichas();
+        }
+
+        void inicializar_nombres()
+        {
+            j1.nombre = "CPU 1", j2.nombre = "CPU 2";
+        }
+
+        void juego()
+        {
+            Jugador jugador;
+
+            do
+            {
+                turno == TRUE ? jugador = j1 : jugador = j2;
+
+                posibles_jugadas(jugador);
+
+                int respuesta = sin_jugadas();
+
+                if (respuesta == FIN)
+                {
+                    break;
+                }
+                else if (respuesta == PASAR)
+                {
+                    continue;
+                }
+                else if (respuesta == CONTINUAR)
+                {
+                    mostrar_tablero();
+                    mostrar_jugador(jugador);
+                    jugada_maquina(jugador);
+
+                    if (tabla_llena() == TRUE)
+                    {
+                        break;
+                    }
+
+                    finalizar_turno();
+                }
+            } while (1);
         }
 };
 
@@ -823,10 +1374,10 @@ class Menu
 {
     // == ATRIBUTOS ==
     private:
-        bool salir = FALSE;
-        char opcion;
-        char modo;
-        Utilidad utilidad;
+        bool salir = FALSE; // Si se vuelve TRUE, se cierra el programa
+        char opcion;        // Almacena la opción elegida en el menú principal
+        char modo;          // Almacena el modo de juego escogido por el usuario
+        Utilidad utilidad;  // Objeto para dar estilo y realizar ciertas tareas en el programa
 
     // == MÉTODOS ==
     public:
@@ -942,16 +1493,31 @@ class Menu
         // Crea la partida en función del modo de juego elegido
         void crear_partida()
         {
+            Partida *partida;
+
             switch (modo)
             {
                 // Se crea una partida de jugador contra jugador
                 case '1':
-                    Jugador_vs_Jugador partida;
-                    partida.configuracion();
-                    partida.juego();
-
-                    system("pause");
+                    partida = new Jugador_vs_Jugador();
+                    partida->configuracion();
+                    partida->juego();
                     break;
+                case '2':
+                    partida = new Jugador_vs_CPU();
+                    partida->configuracion();
+                    partida->juego();
+                    break;
+                case '3':
+                    partida = new CPU_vs_CPU();
+                    partida->configuracion();
+                    partida->juego();
+                    break;
+
+                default: // Mostrar mensaje en caso de equivocación
+                    system("cls");
+                    cout << "\n\t\t\t\t     -Opción Incorrecta - Intente Nuevamente-\n\n";
+                    system("pause");
             }
         }
 };
