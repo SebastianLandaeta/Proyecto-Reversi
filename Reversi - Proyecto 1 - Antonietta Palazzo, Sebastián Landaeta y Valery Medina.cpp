@@ -225,9 +225,10 @@ class Partida
         // Muestra quien será el primer jugador (fichas negras)
         void primer_jugador(Jugador jugador, int aleatorio)
         {
+            system("cls");
             aleatorio == 0 ? utilidad.color(12) : utilidad.color(11);
 
-            utilidad.gotoxy(41, 12);
+            utilidad.gotoxy(41, 2);
             cout << jugador.nombre;
             
             utilidad.color(7);
@@ -719,15 +720,28 @@ class Partida
         }
 
         // Comprueba si hay jugadas posibles en el turno y contiene una condición de fin de partida
-        int sin_jugadas()
+        int sin_jugadas(Jugador jugador)
         {
             // Si no hay jugadas posibles...
             if (n_posibles == 0)
             {
                 pasadas++; // Se pasa de turno
 
+                mostrar_tablero();
+                mostrar_jugador(jugador);
+                
+                utilidad.gotoxy(0, 16);
+                utilidad.color(6);
+
                 if (pasadas == 2) // Condición de fin de partida si ningun jugador puede realizar más movimientos
                 {
+                    cout << "\tYa no hay más jugadas disponibles\n";
+                    utilidad.color(7);
+                    cout << "\n       ___________________________________________________________________________________________\n\n\t";
+                    system("pause");
+                    
+                    system("cls");
+
                     mostrar_tablero();
                     mostrar_ganador();
                     mostrar_resultados();
@@ -735,12 +749,11 @@ class Partida
                 }
                 else // Si aún no se cumple la condición de fin de partida...
                 {
-                    utilidad.gotoxy(0, 16);
-                    utilidad.color(6);
                     cout << "\tNo puedes realizar ninguna jugada, por lo que se le cederá el turno al siguiente jugador\n";
                     utilidad.color(7);
                     cout << "\n       ___________________________________________________________________________________________\n\n\t";
                     system("pause");
+                    finalizar_turno();
                     return PASAR;
                 }
             }
@@ -1032,10 +1045,15 @@ class Partida
                 }
             }
             
+            // Espera 3 segundos para realizar la jugada
             utilidad.gotoxy(0, 16);
+            cout << "Pensando.";
+            Sleep(1000);
+            cout << ".";
+            Sleep(1000);
+            cout << ".";
+            Sleep(1000);
             
-            Sleep(3000);
-
             // Una vez elegida la mejor jugada, el programa procede a realizarla
             jugador.color_fichas == NEGRA ? tabla[cont_f][cont_c] = NEGRA : tabla[cont_f][cont_c] = BLANCA;
 
@@ -1193,7 +1211,7 @@ class Jugador_vs_Jugador : public Partida
 
                 posibles_jugadas(jugador);
 
-                int respuesta = sin_jugadas();
+                int respuesta = sin_jugadas(jugador);
 
                 if (respuesta == FIN)
                 {
@@ -1268,7 +1286,7 @@ class Jugador_vs_CPU : public Partida
                 // El problema es aqui
                 posibles_jugadas(jugador);
 
-                int respuesta = sin_jugadas();
+                int respuesta = sin_jugadas(jugador);
 
                 if (respuesta == FIN)
                 {
@@ -1342,7 +1360,7 @@ class CPU_vs_CPU : public Partida
 
                 posibles_jugadas(jugador);
 
-                int respuesta = sin_jugadas();
+                int respuesta = sin_jugadas(jugador);
 
                 if (respuesta == FIN)
                 {
