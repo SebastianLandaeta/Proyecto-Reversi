@@ -46,7 +46,7 @@ using namespace std;
 
 // == CLASES ==
 
-// Contiene cosas necesarias para hacer ciertas cosas
+// Permite dar estilo y realizar ciertas tareas en el programa
 class Utilidad
 {
     // == MÉTODOS ==
@@ -95,6 +95,7 @@ class Utilidad
             n_cambios = aux;
         }
 
+        // Aumenta en uno el tamaño de una matriz dinámica de enteros
         void agrandar_matriz_int(int **&coord_posibles, int &filas)
         {
             if (filas == 0)
@@ -158,12 +159,12 @@ class Partida
         int tabla[FILAS][COLUMNAS]; // Tablero de juego
         int n_turnos = 1;           // Número de turnos
         int n_posibles = 0;         // Número de posibles jugadas en la tabla
-        int pasadas = 0;            // Si llega a dos, significará que ya no hay más jugadas posibles, por lo que el juego terminaría
-        int cont_f = 0, cont_c = 0; // Coordenada fila y columna (se usan en la colocación de fichas)
+        int pasadas = 0;            // Si llega a dos, significa que ya no hay más jugadas posibles, por lo que el juego terminaría
+        int cont_f = 0, cont_c = 0; // Coordenada fila y columna (se usan para el cambio de fichas y la colocación de posibles jugadas)
         int x = 14, y = 4;          // Coordenada fila y columna (se usan para el gotoxy)
-        int aux_f, aux_c;           // Coordenada fila y columna (se usan para el cambio de fichas y la colocación de posibles jugadas)
+        int aux_f, aux_c;           // Similares a cont_f y cont_c, pero estas sí van a cambiar de valores durante el turno
         bool turno = TRUE;          // Identifica a qué usuario le toca jugar
-        bool op;                    // Identifica si se hará un cambio de color de fichas (FALSE) o una colocación de posible jugada en la tabla (TRUE)
+        bool op;                    // Indica si se hará un cambio de color de fichas (FALSE) o una colocación de posible jugada en la tabla (TRUE)
         Jugador j1, j2;             // Jugadores de la partida 
         Utilidad utilidad;          // Objeto para dar estilo y realizar ciertas tareas en el programa
         
@@ -172,7 +173,7 @@ class Partida
         // Prepara la partida. El cómo lo hará dependerá del tipo de partida a jugar
         virtual void configuracion(){};
 
-        // Asigna nombres a los jugadores. Si el jugador es humano, pide su nombre por teclado
+        // Asigna nombres a los jugadores. Si el jugador es humano, pide su nombre por tecladoc 
         // Si es la máquina, se le asigna un nombre por defecto
         virtual void inicializar_nombres(){};
  
@@ -265,7 +266,7 @@ class Partida
             cont_f = 0, cont_c = 0;
         }
 
-        // Enlista todas las comprobaciones de movimiento, en función de la posición seleccionada por el usuario
+        // Enlista todas las comprobaciones de movimiento, en función de la posición actual en la tabla
         void comprobaciones(Jugador jugador)
         {
             // Comprobar desde el centro
@@ -860,7 +861,6 @@ class Partida
             cout<< j2.n_fichas << endl;
             utilidad.color(7);
 
-
             cout << "\n\n       ___________________________________________________________________________________________\n\n\t";
             system("pause");
         }
@@ -975,10 +975,12 @@ class Partida
         void jugada_humana(Jugador jugador)
         {
             char aux;
+            
+            // Colocar el cursor en la primera posición de la tabla
+            utilidad.gotoxy(x, y);
 
-            utilidad.gotoxy(x, y); // Colocar el cursor en la primera posición de la tabla
-
-            while (1) // Moverse por la tabla para realizar una jugada
+            // Moverse por la tabla para realizar una jugada
+            while (1)
             {
                 if (kbhit())
                 {
@@ -1016,7 +1018,7 @@ class Partida
                     {
                         aux_f = cont_f, aux_c = cont_c;
 
-                        if (validar_jugada(jugador) == TRUE) // Si se valida la jugada...
+                        if (validar_jugada(jugador) == TRUE) // Si es valida la jugada...
                         {
                             contar_fichas(); // Se actualizan los puntos de los jugadores
                             break;
@@ -1026,7 +1028,7 @@ class Partida
             }
         }
 
-        // Le permite a la maquina realizar una jugada (Este método se usa en los modos CPU vs CPU y Jugador vs CPU)
+        // Le permite a la maquina realizar una jugada (Este método se usa en los modos Jugador vs CPU y CPU vs CPU)
         void jugada_maquina(Jugador jugador)
         {
             op = FALSE; // Van a cambiar el color de fichas flanqueadas en la tabla
@@ -1040,7 +1042,6 @@ class Partida
                 if (r < n_cambios[i])
                 {
                     r = n_cambios[i];
-
                     cont_f = coord_posibles[i][0], cont_c = coord_posibles[i][1];
                 }
             }
@@ -1059,11 +1060,11 @@ class Partida
 
             aux_f = cont_f, aux_c = cont_c;
 
-            comprobaciones(jugador);
-            contar_fichas();
+            comprobaciones(jugador); // Hace las comprobaciones correspondientes
+            contar_fichas(); // Y actualiza los puntos de los jugadores
         }
 
-        // Comprueba si la jugada realizada es válida o no (método usado unicamente cuando la jugada es de un humano)
+        // Comprueba si la jugada realizada es válida o no (método usado unicamente cuando la jugada es hecha por un humano)
         bool validar_jugada(Jugador jugador)
         {
             op = FALSE; // Se van a cambiar el color de fichas flanqueadas en la tabla
@@ -1124,15 +1125,15 @@ class Partida
         // Hace operaciones necesarias antes de que el turno del siguiente jugador empiece
         void finalizar_turno()
         {
-            turno = !turno;                   // Se cambia de turno
-            longitud = 0, filas = 0;          // Reiniciar estos
-            n_turnos++;                       // Aumenta el turno
-            pasadas = 0;                      // La racha de pasadas se termina
+            turno = !turno;                   // Cambiar de turno
+            longitud = 0, filas = 0;          // Reiniciar los contadores de los arreglos dinámicos
+            n_turnos++;                       // Incrementa el número de turnos
+            pasadas = 0;                      // La racha de pasadas se reinicia
             n_posibles = 0;                   // Se reinicia el número de posibles jugadas
             x = 14, y = 4;                    // En el siguiente turno se volverá a colocar el cursor en la primera posición de la tabla
             borrar_posibles();                // Se borrarán las posibles jugadas para colocar las del otro jugador
 
-            delete[] n_cambios;               // Liberar el espacio de n_cambios
+            delete[] n_cambios;               // Liberar espacio de n_cambios
 
             for (int i = 0; i < filas-1; i++) // Liberar espacio de coord_posibles
             {
@@ -1263,7 +1264,7 @@ class Jugador_vs_CPU : public Partida
             cout << "       ___________________________________________________________________________________________\n\n\n";
             
             utilidad.color(7);
-	        cout << "\t\t\t         = INGRESE SU NOMBRE =\n\n\n";
+	        cout << "\t\t\t\t           = INGRESE SU NOMBRE =\n\n\n";
              
             cout << "\t\t\t---> ";
             utilidad.color(12);
@@ -1275,6 +1276,7 @@ class Jugador_vs_CPU : public Partida
             j2.nombre = "CPU";
         }
 
+        // Comienza la partida de Jugador vs GPU
         void juego()
         {
             Jugador jugador;
@@ -1307,13 +1309,12 @@ class Jugador_vs_CPU : public Partida
                         break;
                     }
 
-                    utilidad.gotoxy(0, 16);
-
                     finalizar_turno();
                 }
             } while (1);
         }
 
+        // Comprueba si el turno es del humano o de la máquina
         void identificar_jugador(Jugador jugador)
         {
             if (jugador.nombre == "CPU") // Si se cumple, el jugador es la máquina
@@ -1345,11 +1346,13 @@ class CPU_vs_CPU : public Partida
             asignar_fichas();
         }
 
+        // Asigna nombres estandar a las máquinas
         void inicializar_nombres()
         {
             j1.nombre = "CPU 1", j2.nombre = "CPU 2";
         }
 
+        // Comienza la partida de GPU vs GPU
         void juego()
         {
             Jugador jugador;
@@ -1489,12 +1492,10 @@ class Menu
 			utilidad.color(7);
 			cout << ". Jugador vs Jugador\n\n";
             
-            
             utilidad.color(14);
             cout << "\t\t\t\t\t2";
             utilidad.color(7);
 			cout << ". Jugador vs CPU\n\n";
-            
             
             utilidad.color(13);
             cout << "\t\t\t\t\t3";
@@ -1515,18 +1516,17 @@ class Menu
 
             switch (modo)
             {
-                // Se crea una partida de jugador contra jugador
-                case '1':
+                case '1': // Se crea una partida de Jugador vs Jugador
                     partida = new Jugador_vs_Jugador();
                     partida->configuracion();
                     partida->juego();
                     break;
-                case '2':
+                case '2': // Se crea una partida de Jugador vs CPU
                     partida = new Jugador_vs_CPU();
                     partida->configuracion();
                     partida->juego();
                     break;
-                case '3':
+                case '3': // Se crea una partida de CPU vs CPU
                     partida = new CPU_vs_CPU();
                     partida->configuracion();
                     partida->juego();
