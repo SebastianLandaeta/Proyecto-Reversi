@@ -161,7 +161,6 @@ class Partida
         int n_posibles = 0;         // Número de posibles jugadas en la tabla
         int pasadas = 0;            // Si llega a dos, significa que ya no hay más jugadas posibles, por lo que el juego terminaría
         int cont_f = 0, cont_c = 0; // Coordenada fila y columna (se usan para el cambio de fichas y la colocación de posibles jugadas)
-        int x = 14, y = 4;          // Coordenada fila y columna (se usan para el gotoxy)
         int aux_f, aux_c;           // Similares a cont_f y cont_c, pero estas sí van a cambiar de valores durante el turno
         bool turno = TRUE;          // Identifica a qué usuario le toca jugar
         bool op;                    // Indica si se hará un cambio de color de fichas (FALSE) o una colocación de posible jugada en la tabla (TRUE)
@@ -227,9 +226,12 @@ class Partida
         void primer_jugador(Jugador jugador, int aleatorio)
         {
             system("cls");
-            aleatorio == 0 ? utilidad.color(12) : utilidad.color(11);
+            utilidad.color(8);
+            cout << "       ___________________________________________________________________________________________\n\n";
 
-            utilidad.gotoxy(41, 2);
+            aleatorio == 0 ? utilidad.color(12) : utilidad.color(11);
+            
+            utilidad.gotoxy(41, 3);
             cout << jugador.nombre;
             
             utilidad.color(7);
@@ -237,8 +239,8 @@ class Partida
             
             utilidad.color(8);
             cout << "\n       ___________________________________________________________________________________________\n\n\t";
+
             utilidad.color(7);
-            
             system("pause");
         }
 
@@ -736,9 +738,10 @@ class Partida
 
                 if (pasadas == 2) // Condición de fin de partida si ningun jugador puede realizar más movimientos
                 {
-                    cout << "\tYa no hay más jugadas disponibles\n";
-                    utilidad.color(7);
+                    cout << "\n\t\t\t\t     Ya no hay más jugadas disponibles\n";
+                    utilidad.color(8);
                     cout << "\n       ___________________________________________________________________________________________\n\n\t";
+                    utilidad.color(7);
                     system("pause");
                     
                     system("cls");
@@ -750,8 +753,8 @@ class Partida
                 }
                 else // Si aún no se cumple la condición de fin de partida...
                 {
-                    cout << "\tNo puedes realizar ninguna jugada, por lo que se le cederá el turno al siguiente jugador\n";
-                    utilidad.color(7);
+                    cout << "\n\t No puedes realizar ninguna jugada, por lo que se le cederá el turno al siguiente jugador\n";
+                    utilidad.color(8);
                     cout << "\n       ___________________________________________________________________________________________\n\n\t";
                     system("pause");
                     finalizar_turno();
@@ -819,17 +822,17 @@ class Partida
             cout<< j1.nombre << endl;
             utilidad.color(7);
 
-            utilidad.gotoxy(15,20);
+            utilidad.gotoxy(15, 20);
             cout << "Color de Fichas: ";
             utilidad.color(12);
             cout << (j1.color_fichas == NEGRA ? "Negras" : "Blancas") << endl;
             utilidad.color(7);
 
-            utilidad.gotoxy(15,22);
+            utilidad.gotoxy(15, 22);
             cout << "Número de Fichas: ";
             utilidad.color(12);
             cout << j1.n_fichas << endl;
-            utilidad.color(7);
+            utilidad.color(8);
 
             for (int Y = 16; Y < 24; Y++)
             {
@@ -855,13 +858,15 @@ class Partida
             cout<< (j2.color_fichas == NEGRA ? "Negras" : "Blancas") << endl;
             utilidad.color(7);
 
-            utilidad.gotoxy(61,22);
+            utilidad.gotoxy(61, 22);
             cout << "Número de Fichas: ";
             utilidad.color(11);
             cout<< j2.n_fichas << endl;
-            utilidad.color(7);
 
+            utilidad.color(8);
             cout << "\n\n       ___________________________________________________________________________________________\n\n\t";
+
+            utilidad.color(7);
             system("pause");
         }
 
@@ -870,12 +875,14 @@ class Partida
         {
             system("cls");
 
+            utilidad.color(8);
             cout << "       ___________________________________________________________________________________________\n\n\n";
 
             cout << "\t    ";
 
             for (int i = 0; i < FILAS; i++) // Imprimir letras
             {
+                utilidad.color(7);
                 char letra = 65 + i;
                 cout << "  " << letra << " ";
             }
@@ -925,14 +932,14 @@ class Partida
                 }
             }
 
-            utilidad.color(7);
-
+            utilidad.color(8);
             cout << "\n\n       ___________________________________________________________________________________________\n\n";
         }
 
         // Muestra la información del jugador en pantalla
         void mostrar_jugador(Jugador jugador)
         {
+            utilidad.color(8);
             for (int i = 3; i < 13; i++)
             {
                 utilidad.gotoxy(54, i);
@@ -975,7 +982,8 @@ class Partida
         void jugada_humana(Jugador jugador)
         {
             char aux;
-            
+            int x = 14, y = 4; 
+
             // Colocar el cursor en la primera posición de la tabla
             utilidad.gotoxy(x, y);
 
@@ -1045,9 +1053,14 @@ class Partida
                     cont_f = coord_posibles[i][0], cont_c = coord_posibles[i][1];
                 }
             }
+
+            utilidad.gotoxy(0, 19);
+            utilidad.color(8);
+            cout << "\n       ___________________________________________________________________________________________\n\n\t";
             
             // Espera 3 segundos para realizar la jugada
-            utilidad.gotoxy(0, 16);
+            utilidad.gotoxy(48, 17);
+            utilidad.color(7);
             cout << "Pensando.";
             Sleep(1000);
             cout << ".";
@@ -1078,9 +1091,13 @@ class Partida
             }
             else // Si no es posible realizar la jugada...
             {
-                utilidad.gotoxy(0, 16);
-                cout << "El movimiento que desea realizar no es válido. Por favor, inténtelo de nuevo.\n";
-                utilidad.gotoxy(x, y);
+                utilidad.gotoxy(0, 17);
+                utilidad.color(6);
+                cout << "\t\tEl movimiento que desea realizar no es válido. Por favor, intentelo de nuevo.";
+                utilidad.color(8);
+                cout << "\n\n       ___________________________________________________________________________________________\n\n";
+                utilidad.gotoxy(14, 4);
+                utilidad.color(7);
                 return FALSE;
             }
         }
@@ -1130,7 +1147,6 @@ class Partida
             n_turnos++;                       // Incrementa el número de turnos
             pasadas = 0;                      // La racha de pasadas se reinicia
             n_posibles = 0;                   // Se reinicia el número de posibles jugadas
-            x = 14, y = 4;                    // En el siguiente turno se volverá a colocar el cursor en la primera posición de la tabla
             borrar_posibles();                // Se borrarán las posibles jugadas para colocar las del otro jugador
 
             delete[] n_cambios;               // Liberar espacio de n_cambios
@@ -1429,16 +1445,26 @@ class Menu
 
                     case '0': // Salir del juego
                         system("cls");
-                        cout << "       ___________________________________________________________________________________________\n\n\n";
-                        cout << "\n\t\t\t\t\t  = Gracias por Jugar <(* U *)/ =\n\n\n";
+                        utilidad.color(8);
+                        cout << "       ___________________________________________________________________________________________\n\n";
+                        utilidad.color(10);
+                        cout << "\n\t\t\t\t\t  = Gracias por Jugar <(* U *)/ =\n\n";
+                        utilidad.color(8);
                         cout << "       ___________________________________________________________________________________________\n\n\t";
+                        utilidad.color(7);
                         system("pause");
                         salir = TRUE;
                         break;
 
                     default: // Mostrar mensaje en caso de equivocación
                         system("cls");
+                        utilidad.color(8);
+                        cout << "       ___________________________________________________________________________________________\n\n";
+                        utilidad.color(12);
                         cout << "\n\t\t\t\t     -Opción Incorrecta - Intente Nuevamente-\n\n";
+                        utilidad.color(8);
+                        cout << "       ___________________________________________________________________________________________\n\n\t";
+                        utilidad.color(7);
                         system("pause");
                 }
 
