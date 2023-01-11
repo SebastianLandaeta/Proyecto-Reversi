@@ -1560,7 +1560,13 @@ class Menu
 
                 default: // Mostrar mensaje en caso de equivocación
                     system("cls");
+                    utilidad.color(8);
+                    cout << "       ___________________________________________________________________________________________\n\n";
+                    utilidad.color(12);
                     cout << "\n\t\t\t\t     -Opción Incorrecta - Intente Nuevamente-\n\n";
+                    utilidad.color(8);
+                    cout << "       ___________________________________________________________________________________________\n\n\t";
+                    utilidad.color(7);
                     system("pause");
             }
         }
