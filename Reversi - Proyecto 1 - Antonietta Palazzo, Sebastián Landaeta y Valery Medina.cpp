@@ -1,9 +1,9 @@
 /*	Proyecto 1: Reversi
-    IngenierÌa Inform·tica
+    Ingenier√≠a Inform√°tica
     Estructuras de Datos
-    SecciÛn 1
+    Secci√≥n 1
     Alumnos:
-        Sebasti·n Landaeta (CI: 28.240.979)
+        Sebasti√°n Landaeta (CI: 28.240.979)
         Antonietta Palazzo (CI: 28.619.939)
         Valery Medina (CI: 29.643.312)
 */
@@ -32,7 +32,7 @@
 #define COLUMNAS 8
 #define TOTAL FILAS * COLUMNAS
 
-// Tipos de retorno del mÈtodo sin_jugadas()
+// Tipos de retorno del m√©todo sin_jugadas()
 #define FIN 1
 #define PASAR 2
 #define CONTINUAR 3
@@ -49,7 +49,7 @@ using namespace std;
 // Permite dar estilo y realizar ciertas tareas en el programa
 class Utilidad
 {
-    // == M…TODOS ==
+    // == M√âTODOS ==
     public:
         // Pinta elementos en pantalla
         void color(int n)
@@ -57,7 +57,7 @@ class Utilidad
             SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), n);
         }
 
-        // Mueve el cursor a una coordenada especÌfica
+        // Mueve el cursor a una coordenada espec√≠fica
         void gotoxy(int X, int Y)
         {
             HANDLE hcon = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -67,7 +67,7 @@ class Utilidad
             SetConsoleCursorPosition(hcon, dwPos);
         }
 
-        // Aumenta en uno el tamaÒo de un vector din·mico de enteros
+        // Aumenta en uno el tama√±o de un vector din√°mico de enteros
         void agrandar_vector_int(int *&n_cambios, int &longitud)
         {
             if (longitud == 0)
@@ -95,7 +95,7 @@ class Utilidad
             n_cambios = aux;
         }
 
-        // Aumenta en uno el tamaÒo de una matriz din·mica de enteros
+        // Aumenta en uno el tama√±o de una matriz din√°mica de enteros
         void agrandar_matriz_int(int **&coord_posibles, int &filas)
         {
             if (filas == 0)
@@ -143,7 +143,7 @@ class Jugador
     public:
         string nombre;    // Nombre del jugador
         int color_fichas; // Fichas asignadas
-        int n_fichas;     // N˙mero de fichas de su color en el tablero
+        int n_fichas;     // N√∫mero de fichas de su color en el tablero
 };
 
 // Contiene todo lo referente a las partidas y al funcionamiento del juego
@@ -152,31 +152,31 @@ class Partida
     // == ATRIBUTOS ==
     protected:
         int modo;                   // Modo de juego
-        int *n_cambios;             // Almacena el n˙mero de fichas contrarias que se cambiarÌan al colocar una ficha propia en cada posible jugada
+        int *n_cambios;             // Almacena el n√∫mero de fichas contrarias que se cambiar√≠an al colocar una ficha propia en cada posible jugada
         int **coord_posibles;       // Almacena las coordenadas en las que se encuentra cada posible jugada
         int longitud = 0;           // Longitud del vector n_cambios
-        int filas = 0;              // N˙mero de filas de la matriz coord_posibles
+        int filas = 0;              // N√∫mero de filas de la matriz coord_posibles
         int tabla[FILAS][COLUMNAS]; // Tablero de juego
-        int n_turnos = 1;           // N˙mero de turnos
-        int n_posibles = 0;         // N˙mero de posibles jugadas en la tabla
-        int pasadas = 0;            // Si llega a dos, significa que ya no hay m·s jugadas posibles, por lo que el juego terminarÌa
-        int cont_f = 0, cont_c = 0; // Coordenada fila y columna (se usan para el cambio de fichas y la colocaciÛn de posibles jugadas)
-        int aux_f, aux_c;           // Similares a cont_f y cont_c, pero estas sÌ van a cambiar de valores durante el turno
-        bool turno = TRUE;          // Identifica a quÈ usuario le toca jugar
-        bool op;                    // Indica si se har· un cambio de color de fichas (FALSE) o una colocaciÛn de posible jugada en la tabla (TRUE)
+        int n_turnos = 1;           // N√∫mero de turnos
+        int n_posibles = 0;         // N√∫mero de posibles jugadas en la tabla
+        int pasadas = 0;            // Si llega a dos, significa que ya no hay m√°s jugadas posibles, por lo que el juego terminar√≠a
+        int cont_f = 0, cont_c = 0; // Coordenada fila y columna (se usan para el cambio de fichas y la colocaci√≥n de posibles jugadas)
+        int aux_f, aux_c;           // Similares a cont_f y cont_c, pero estas s√≠ van a cambiar de valores durante el turno
+        bool turno = TRUE;          // Identifica a qu√© usuario le toca jugar
+        bool op;                    // Indica si se har√° un cambio de color de fichas (FALSE) o una colocaci√≥n de posible jugada en la tabla (TRUE)
         Jugador j1, j2;             // Jugadores de la partida 
         Utilidad utilidad;          // Objeto para dar estilo y realizar ciertas tareas en el programa
         
-    // == M…TODOS ==
+    // == M√âTODOS ==
     public:
-        // Prepara la partida. El cÛmo lo har· depender· del tipo de partida a jugar
+        // Prepara la partida. El c√≥mo lo har√° depender√° del tipo de partida a jugar
         virtual void configuracion(){};
 
-        // Asigna nombres a los jugadores. Si el jugador es humano, pide su nombre por tecladoc 
-        // Si es la m·quina, se le asigna un nombre por defecto
+        // Asigna nombres a los jugadores. Si el jugador es humano, pide su nombre por teclado 
+        // Si es la m√°quina, se le asigna un nombre por defecto
         virtual void inicializar_nombres(){};
  
-        // Comienza la partida seg˙n el modo de juego seleccionado
+        // Comienza la partida seg√∫n el modo de juego seleccionado
         virtual void juego(){};
 
         // Prepara la tabla para el inicio de una partida
@@ -198,13 +198,13 @@ class Partida
             tabla[3][3] = BLANCA, tabla[4][4] = BLANCA;
         }
         
-        // Elije aleatoriamente quien ser· el primer y segundo jugador (fichas negras y blancas, respectivamente)
+        // Elije aleatoriamente quien ser√° el primer y segundo jugador (fichas negras y blancas, respectivamente)
         void asignar_fichas()
         {
             // Semilla para el randomizer
             srand(time(0));
 
-            // ElecciÛn aleatoria
+            // Elecci√≥n aleatoria
             int aleatorio = rand() % 2;
 
             // Mostrar al primer jugador y asignar los colores de cada objeto Jugador
@@ -216,13 +216,13 @@ class Partida
             }
             else
             {
-				primer_jugador(j2, aleatorio);
+	            primer_jugador(j2, aleatorio);
                 turno = FALSE;
                 j2.color_fichas = NEGRA, j1.color_fichas = BLANCA;
             }
         }
 
-        // Muestra quien ser· el primer jugador (fichas negras)
+        // Muestra quien ser√° el primer jugador (fichas negras)
         void primer_jugador(Jugador jugador, int aleatorio)
         {
             system("cls");
@@ -235,7 +235,7 @@ class Partida
             cout << jugador.nombre;
             
             utilidad.color(7);
-            cout << " ser· el primer jugador.\n";
+            cout << " ser√° el primer jugador.\n";
             
             utilidad.color(8);
             cout << "\n       ___________________________________________________________________________________________\n\n\t";
@@ -268,7 +268,7 @@ class Partida
             cont_f = 0, cont_c = 0;
         }
 
-        // Enlista todas las comprobaciones de movimiento, en funciÛn de la posiciÛn actual en la tabla
+        // Enlista todas las comprobaciones de movimiento, en funci√≥n de la posici√≥n actual en la tabla
         void comprobaciones(Jugador jugador)
         {
             // Comprobar desde el centro
@@ -371,25 +371,25 @@ class Partida
         {
             aux_f--;
 
-            if (op == TRUE) // Se har· una colocaciÛn de posible jugada
+            if (op == TRUE) // Se har√° una colocaci√≥n de posible jugada
             {
                 while ((aux_f > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
                 {
                     aux_f--;
                     
-                    if (insertar_posible() == TRUE) // Si se cumple esta condiciÛn, se inserta la posible jugada y se termina el ciclo
+                    if (insertar_posible() == TRUE) // Si se cumple esta condici√≥n, se inserta la posible jugada y se termina el ciclo
                     {
                         break;
                     }
                 }
             }
-            else // Se har· un cambio de color de fichas
+            else // Se har√° un cambio de color de fichas
             {
                 while ((aux_f > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
                 {
                     aux_f--;
 
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condiciÛn, se cambiar·n de color todas las fichas posibles
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condici√≥n, se cambiar√°n de color todas las fichas posibles
                     {
                         aux_f++;
                         
@@ -410,25 +410,25 @@ class Partida
         {
             aux_f++;
             
-            if (op == TRUE) // Se har· una colocaciÛn de posible jugada
+            if (op == TRUE) // Se har√° una colocaci√≥n de posible jugada
             {
                 while ((aux_f < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
                 {
                     aux_f++;
 
-                    if (insertar_posible() == TRUE) // Si se cumple la condiciÛn, se inserta la posible jugada y se termina el ciclo
+                    if (insertar_posible() == TRUE) // Si se cumple la condici√≥n, se inserta la posible jugada y se termina el ciclo
                     {
                         break;
                     }
                 }
             }
-            else // Se har· un cambio de color de fichas
+            else // Se har√° un cambio de color de fichas
             {
                 while ((aux_f < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
                 {
                     aux_f++;
 
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condiciÛn, se cambiar·n de color todas las fichas posibles
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condici√≥n, se cambiar√°n de color todas las fichas posibles
                     {
                         aux_f--;
 
@@ -449,25 +449,25 @@ class Partida
         {
             aux_c--;
 
-            if (op == TRUE) // Se har· una colocaciÛn de posible jugada
+            if (op == TRUE) // Se har√° una colocaci√≥n de posible jugada
             {
                 while ((aux_c > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
                 {
                     aux_c--;
 
-                    if (insertar_posible() == TRUE) // Si se cumple la condiciÛn, se inserta la posible jugada y se termina el ciclo
+                    if (insertar_posible() == TRUE) // Si se cumple la condici√≥n, se inserta la posible jugada y se termina el ciclo
                     {
                         break;
                     }
                 }
             }
-            else // Se har· un cambio de color de fichas
+            else // Se har√° un cambio de color de fichas
             {
                 while ((aux_c > 0) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
                 {
                     aux_c--;
 
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condiciÛn, se cambiar·n de color todas las fichas posibles
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condici√≥n, se cambiar√°n de color todas las fichas posibles
                     {
                         aux_c++;
 
@@ -488,25 +488,25 @@ class Partida
         {
             aux_c++;
 
-            if (op == TRUE) // Se har· una colocaciÛn de posible jugada
+            if (op == TRUE) // Se har√° una colocaci√≥n de posible jugada
             {
                 while ((aux_c < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
                 {
                     aux_c++;
 
-                    if (insertar_posible() == TRUE) // Si se cumple la condiciÛn, se inserta la posible jugada y se termina el ciclo
+                    if (insertar_posible() == TRUE) // Si se cumple la condici√≥n, se inserta la posible jugada y se termina el ciclo
                     {
                         break;
                     }
                 }
             }
-            else // Se har· un cambio de color de fichas
+            else // Se har√° un cambio de color de fichas
             {
                 while ((aux_c < 7) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
                 {
                     aux_c++;
 
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condiciÛn, se cambiar·n de color todas las fichas posibles
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condici√≥n, se cambiar√°n de color todas las fichas posibles
                     {
                         aux_c--;
 
@@ -527,25 +527,25 @@ class Partida
         {
             aux_f--, aux_c++;
             
-            if (op == TRUE) // Se har· una colocaciÛn de posible jugada
+            if (op == TRUE) // Se har√° una colocaci√≥n de posible jugada
             {
                 while (((aux_f > 0) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
                 {
                     aux_f--, aux_c++;
 
-                    if (insertar_posible() == TRUE) // Si se cumple la condiciÛn, se inserta la posible jugada y se termina el ciclo
+                    if (insertar_posible() == TRUE) // Si se cumple la condici√≥n, se inserta la posible jugada y se termina el ciclo
                     {
                         break;
                     }
                 }
             }
-            else // Se har· un cambio de color de fichas
+            else // Se har√° un cambio de color de fichas
             {
                 while (((aux_f > 0) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
                 {
                     aux_f--, aux_c++;
 
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condiciÛn, se cambiar·n de color todas las fichas posibles
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condici√≥n, se cambiar√°n de color todas las fichas posibles
                     {
                         aux_f++, aux_c--;
 
@@ -566,25 +566,25 @@ class Partida
         {
             aux_f++, aux_c++;
 
-            if (op == TRUE) // Se har· una colocaciÛn de posible jugada
+            if (op == TRUE) // Se har√° una colocaci√≥n de posible jugada
             {
                 while (((aux_f < 7) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
                 {
                     aux_f++, aux_c++;
 
-                    if (insertar_posible() == TRUE) // Si se cumple la condiciÛn, se inserta la posible jugada y se termina el ciclo
+                    if (insertar_posible() == TRUE) // Si se cumple la condici√≥n, se inserta la posible jugada y se termina el ciclo
                     {
                         break;
                     }
                 }
             }
-            else // Se har· un cambio de color de fichas
+            else // Se har√° un cambio de color de fichas
             {
                 while (((aux_f < 7) && (aux_c < 7)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
                 {
                     aux_f++, aux_c++;
 
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condiciÛn, se cambiar·n de color todas las fichas posibles
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condici√≥n, se cambiar√°n de color todas las fichas posibles
                     {
                         aux_f--, aux_c--;
 
@@ -605,25 +605,25 @@ class Partida
         {
             aux_f--, aux_c--;
 
-            if (op == TRUE) // Se har· una colocaciÛn de posible jugada
+            if (op == TRUE) // Se har√° una colocaci√≥n de posible jugada
             {
                 while (((aux_f > 0) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
                 {
                     aux_f--, aux_c--;
 
-                    if (insertar_posible() == TRUE) // Si se cumple la condiciÛn, se inserta la posible jugada y se termina el ciclo
+                    if (insertar_posible() == TRUE) // Si se cumple la condici√≥n, se inserta la posible jugada y se termina el ciclo
                     {
                         break;
                     }
                 }
             }
-            else // Se har· un cambio de color de fichas
+            else // Se har√° un cambio de color de fichas
             {
                 while (((aux_f > 0) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
                 {
                     aux_f--, aux_c--;
 
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condiciÛn, se cambiar·n de color todas las fichas posibles
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condici√≥n, se cambiar√°n de color todas las fichas posibles
                     {
                         aux_f++, aux_c++;
 
@@ -644,25 +644,25 @@ class Partida
         {
             aux_f++, aux_c--;
 
-            if (op == TRUE) // Se har· una colocaciÛn de posible jugada
+            if (op == TRUE) // Se har√° una colocaci√≥n de posible jugada
             {
                 while (((aux_f < 7) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para posteriormente insertar la posible jugada
                 {
                     aux_f++, aux_c--;
 
-                    if (insertar_posible() == TRUE) // Si se cumple la condiciÛn, se inserta la posible jugada y se termina el ciclo
+                    if (insertar_posible() == TRUE) // Si se cumple la condici√≥n, se inserta la posible jugada y se termina el ciclo
                     {
                         break;
                     }
                 }
             }
-            else // Se har· un cambio de color de fichas
+            else // Se har√° un cambio de color de fichas
             {
                 while (((aux_f < 7) && (aux_c > 0)) && ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == BLANCA : tabla[aux_f][aux_c] == NEGRA)) // Comprobar si hay al menos una ficha del color contrario para flanquear
                 {
                     aux_f++, aux_c--;
 
-                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condiciÛn, se cambiar·n de color todas las fichas posibles
+                    if ((jugador.color_fichas == NEGRA) ? tabla[aux_f][aux_c] == NEGRA : tabla[aux_f][aux_c] == BLANCA) // Si se cumple esta condici√≥n, se cambiar√°n de color todas las fichas posibles
                     {
                         aux_f--, aux_c++;
 
@@ -681,23 +681,23 @@ class Partida
         // Comprobar si se puede insertar una posible jugada en la tabla
         bool insertar_posible()
         {
-            // Si hay un espacio vacÌo...
+            // Si hay un espacio vac√≠o...
             if (tabla[aux_f][aux_c] == VACIO)
             {
                 tabla[aux_f][aux_c] = POSIBLE; // Colocar la posible jugada
-                n_posibles++;                  // Incrementar el n˙mero de posibles jugadas en la tabla
+                n_posibles++;                  // Incrementar el n√∫mero de posibles jugadas en la tabla
 
-                // Si estamos en un modo de juego con m·quina...
+                // Si estamos en un modo de juego con m√°quina...
                 if ((modo == JUGADOR_VS_CPU) || (modo == CPU_VS_CPU))
                 {
-                    // Incrementar el tamaÒo de n_cambios y coord_posibles
+                    // Incrementar el tama√±o de n_cambios y coord_posibles
                     utilidad.agrandar_vector_int(n_cambios, longitud);
                     utilidad.agrandar_matriz_int(coord_posibles, filas);
                             
                     // Insertar las coordenadas de la posible jugada en la matriz
                     coord_posibles[filas-1][0] = aux_f, coord_posibles[filas-1][1] = aux_c;
 
-                    // Insertar el n˙mero de fichas que se cambiarÌan al realizar la jugada
+                    // Insertar el n√∫mero de fichas que se cambiar√≠an al realizar la jugada
                     n_cambios[longitud-1] = calcular_cambios();
                 }
 
@@ -707,7 +707,7 @@ class Partida
             return FALSE;
         }
 
-        // Calcular el n˙mero de fichas que se cambiarÌan al realizar la jugada
+        // Calcular el n√∫mero de fichas que se cambiar√≠an al realizar la jugada
         int calcular_cambios()
         {
             // Cuando el cambio de fichas es vertical o diagonal
@@ -722,7 +722,7 @@ class Partida
             }
         }
 
-        // Comprueba si hay jugadas posibles en el turno y contiene una condiciÛn de fin de partida
+        // Comprueba si hay jugadas posibles en el turno y contiene una condici√≥n de fin de partida
         int sin_jugadas(Jugador jugador)
         {
             // Si no hay jugadas posibles...
@@ -736,9 +736,9 @@ class Partida
                 utilidad.gotoxy(0, 16);
                 utilidad.color(6);
 
-                if (pasadas == 2) // CondiciÛn de fin de partida si ningun jugador puede realizar m·s movimientos
+                if (pasadas == 2) // Condici√≥n de fin de partida si ningun jugador puede realizar m√°s movimientos
                 {
-                    cout << "\n\t\t\t\t     Ya no hay m·s jugadas disponibles\n";
+                    cout << "\n\t\t\t\t     Ya no hay m√°s jugadas disponibles\n";
                     utilidad.color(8);
                     cout << "\n       ___________________________________________________________________________________________\n\n\t";
                     utilidad.color(7);
@@ -751,9 +751,9 @@ class Partida
                     mostrar_resultados();
                     return FIN;
                 }
-                else // Si a˙n no se cumple la condiciÛn de fin de partida...
+                else // Si a√∫n no se cumple la condici√≥n de fin de partida...
                 {
-                    cout << "\n\t No puedes realizar ninguna jugada, por lo que se le ceder· el turno al siguiente jugador\n";
+                    cout << "\n\t No puedes realizar ninguna jugada, por lo que se le ceder√° el turno al siguiente jugador\n";
                     utilidad.color(8);
                     cout << "\n       ___________________________________________________________________________________________\n\n\t";
                     system("pause");
@@ -829,7 +829,7 @@ class Partida
             utilidad.color(7);
 
             utilidad.gotoxy(15, 22);
-            cout << "N˙mero de Fichas: ";
+            cout << "N√∫mero de Fichas: ";
             utilidad.color(12);
             cout << j1.n_fichas << endl;
             utilidad.color(8);
@@ -859,7 +859,7 @@ class Partida
             utilidad.color(7);
 
             utilidad.gotoxy(61, 22);
-            cout << "N˙mero de Fichas: ";
+            cout << "N√∫mero de Fichas: ";
             utilidad.color(11);
             cout<< j2.n_fichas << endl;
 
@@ -900,24 +900,24 @@ class Partida
                     utilidad.color(32);
                     cout << "|";
 
-                    if (tabla[i][j] == VACIO) // CondiciÛn para mostrar los espacios vacÌos
+                    if (tabla[i][j] == VACIO) // Condici√≥n para mostrar los espacios vac√≠os
                     {
                         cout << "   ";
                     }                
                     
-                    if (tabla[i][j] == NEGRA) // CondiciÛn para mostrar las fichas negras
+                    if (tabla[i][j] == NEGRA) // Condici√≥n para mostrar las fichas negras
                     {
                         utilidad.color(32);
                         cout << " O "; 
                     }
 
-                    if (tabla[i][j] == BLANCA) // CondiciÛn para mostrar las fichas blancas
+                    if (tabla[i][j] == BLANCA) // Condici√≥n para mostrar las fichas blancas
                     {
                         utilidad.color(47);
                         cout << " O ";
                     }
 
-                    if (tabla[i][j] == POSIBLE) // CondiciÛn para mostrar las posibles jugadas
+                    if (tabla[i][j] == POSIBLE) // Condici√≥n para mostrar las posibles jugadas
                     {
                         utilidad.color(36);
                         cout << " ? ";
@@ -936,7 +936,7 @@ class Partida
             cout << "\n\n       ___________________________________________________________________________________________\n\n";
         }
 
-        // Muestra la informaciÛn del jugador en pantalla
+        // Muestra la informaci√≥n del jugador en pantalla
         void mostrar_jugador(Jugador jugador)
         {
             utilidad.color(8);
@@ -964,7 +964,7 @@ class Partida
 
             utilidad.gotoxy(57, 9);
             utilidad.color(7);
-            cout << "--> N˙mero de Fichas: ";
+            cout << "--> N√∫mero de Fichas: ";
             jugador.color_fichas == NEGRA ? utilidad.color(12) : utilidad.color(11);
             cout << jugador.n_fichas;
 
@@ -978,13 +978,13 @@ class Partida
             utilidad.gotoxy(6, 16);
         }
 
-        // Le permite a un humano realizar una jugada (Este mÈtodo se usa en los modos Jugador vs Jugador y Jugador vs CPU)
+        // Le permite a un humano realizar una jugada (Este m√©todo se usa en los modos Jugador vs Jugador y Jugador vs CPU)
         void jugada_humana(Jugador jugador)
         {
             char aux;
             int x = 14, y = 4; 
 
-            // Colocar el cursor en la primera posiciÛn de la tabla
+            // Colocar el cursor en la primera posici√≥n de la tabla
             utilidad.gotoxy(x, y);
 
             // Moverse por la tabla para realizar una jugada
@@ -1036,12 +1036,12 @@ class Partida
             }
         }
 
-        // Le permite a la maquina realizar una jugada (Este mÈtodo se usa en los modos Jugador vs CPU y CPU vs CPU)
+        // Le permite a la maquina realizar una jugada (Este m√©todo se usa en los modos Jugador vs CPU y CPU vs CPU)
         void jugada_maquina(Jugador jugador)
         {
             op = FALSE; // Van a cambiar el color de fichas flanqueadas en la tabla
 
-            // Elegir la posible jugada que m·s fichas le dar· a la m·quina
+            // Elegir la posible jugada que m√°s fichas le dar√° a la m√°quina
             int r = n_cambios[0];
             cont_f = coord_posibles[0][0], cont_c = coord_posibles[0][1];
 
@@ -1077,7 +1077,7 @@ class Partida
             contar_fichas(); // Y actualiza los puntos de los jugadores
         }
 
-        // Comprueba si la jugada realizada es v·lida o no (mÈtodo usado unicamente cuando la jugada es hecha por un humano)
+        // Comprueba si la jugada realizada es v√°lida o no (m√©todo usado unicamente cuando la jugada es hecha por un humano)
         bool validar_jugada(Jugador jugador)
         {
             op = FALSE; // Se van a cambiar el color de fichas flanqueadas en la tabla
@@ -1093,7 +1093,7 @@ class Partida
             {
                 utilidad.gotoxy(0, 17);
                 utilidad.color(6);
-                cout << "\t\tEl movimiento que desea realizar no es v·lido. Por favor, intentelo de nuevo.";
+                cout << "\t\tEl movimiento que desea realizar no es v√°lido. Por favor, intentelo de nuevo.";
                 utilidad.color(8);
                 cout << "\n\n       ___________________________________________________________________________________________\n\n";
                 utilidad.gotoxy(14, 4);
@@ -1102,7 +1102,7 @@ class Partida
             }
         }
         
-        // Cuenta el n˙mero de fichas blancas y negras que hay en el tablero
+        // Cuenta el n√∫mero de fichas blancas y negras que hay en el tablero
         void contar_fichas()
         {
             int negras = 0, blancas = 0;
@@ -1125,7 +1125,7 @@ class Partida
             (j1.color_fichas == NEGRA) ? (j1.n_fichas = negras, j2.n_fichas = blancas) : (j2.n_fichas = negras, j1.n_fichas = blancas);
         }
 
-        // CondiciÛn de fin de partida si la tabla se llena
+        // Condici√≥n de fin de partida si la tabla se llena
         bool tabla_llena()
         {
             if ((j1.n_fichas + j2.n_fichas) == TOTAL)
@@ -1143,11 +1143,11 @@ class Partida
         void finalizar_turno()
         {
             turno = !turno;                   // Cambiar de turno
-            longitud = 0, filas = 0;          // Reiniciar los contadores de los arreglos din·micos
-            n_turnos++;                       // Incrementa el n˙mero de turnos
+            longitud = 0, filas = 0;          // Reiniciar los contadores de los arreglos din√°micos
+            n_turnos++;                       // Incrementa el n√∫mero de turnos
             pasadas = 0;                      // La racha de pasadas se reinicia
-            n_posibles = 0;                   // Se reinicia el n˙mero de posibles jugadas
-            borrar_posibles();                // Se borrar·n las posibles jugadas para colocar las del otro jugador
+            n_posibles = 0;                   // Se reinicia el n√∫mero de posibles jugadas
+            borrar_posibles();                // Se borrar√°n las posibles jugadas para colocar las del otro jugador
 
             delete[] n_cambios;               // Liberar espacio de n_cambios
 
@@ -1200,20 +1200,20 @@ class Jugador_vs_Jugador : public Partida
             cout << "       ___________________________________________________________________________________________\n\n\n";
             
             utilidad.color(7);
-	        cout << "\t\t\t         = INGRESE LOS NOMBRES DE LOS JUGADORES =\n\n\n";
+	    cout << "\t\t\t         = INGRESE LOS NOMBRES DE LOS JUGADORES =\n\n\n";
              
             cout << "\t\t\t---> ";
             utilidad.color(12);
-			cout << "Primer jugador";
-			utilidad.color(7);
-			cout << ": ";
+	    cout << "Primer jugador";
+	    utilidad.color(7);
+	    cout << ": ";
             getline(cin, j1.nombre);
 			
             cout << "\n\t\t\t---> ";
             utilidad.color(11);
-			cout << "Segundo jugador";
-			utilidad.color(7);
-			cout << ": ";
+	    cout << "Segundo jugador";
+	    utilidad.color(7);
+            cout << ": ";
             getline(cin, j2.nombre);
         }
 
@@ -1259,7 +1259,7 @@ class Jugador_vs_Jugador : public Partida
 class Jugador_vs_CPU : public Partida
 {
     public:
-        // Prepara la partida para un jugador humano y uno controlado por la m·quina
+        // Prepara la partida para un jugador humano y uno controlado por la m√°quina
         void configuracion()
         {
             // Indicar el modo de juego
@@ -1273,20 +1273,20 @@ class Jugador_vs_CPU : public Partida
             asignar_fichas();
         }
 
-        // Pide el nombre del jugador humano y le asigna uno por defecto a la m·quina
+        // Pide el nombre del jugador humano y le asigna uno por defecto a la m√°quina
         void inicializar_nombres()
         {
             utilidad.color(8);
             cout << "       ___________________________________________________________________________________________\n\n\n";
             
             utilidad.color(7);
-	        cout << "\t\t\t\t           = INGRESE SU NOMBRE =\n\n\n";
+	    cout << "\t\t\t\t           = INGRESE SU NOMBRE =\n\n\n";
              
             cout << "\t\t\t---> ";
             utilidad.color(12);
-		    cout << "Jugador";
-		    utilidad.color(7);
-		    cout << ": ";
+	    cout << "Jugador";
+	    utilidad.color(7);
+	    cout << ": ";
             getline(cin, j1.nombre);
 
             j2.nombre = "CPU";
@@ -1330,10 +1330,10 @@ class Jugador_vs_CPU : public Partida
             } while (1);
         }
 
-        // Comprueba si el turno es del humano o de la m·quina
+        // Comprueba si el turno es del humano o de la m√°quina
         void identificar_jugador(Jugador jugador)
         {
-            if (jugador.nombre == "CPU") // Si se cumple, el jugador es la m·quina
+            if (jugador.nombre == "CPU") // Si se cumple, el jugador es la m√°quina
             {
                 jugada_maquina(jugador);
             }
@@ -1348,7 +1348,7 @@ class Jugador_vs_CPU : public Partida
 class CPU_vs_CPU : public Partida
 {
     public:
-        // Prepara la partida para dos jugadores controlador por la m·quina
+        // Prepara la partida para dos jugadores controlador por la m√°quina
         void configuracion()
         {
             // Indicar el modo de juego
@@ -1362,7 +1362,7 @@ class CPU_vs_CPU : public Partida
             asignar_fichas();
         }
 
-        // Asigna nombres estandar a las m·quinas
+        // Asigna nombres estandar a las m√°quinas
         void inicializar_nombres()
         {
             j1.nombre = "CPU 1", j2.nombre = "CPU 2";
@@ -1406,27 +1406,27 @@ class CPU_vs_CPU : public Partida
         }
 };
 
-// Permite interactuar y visualizar el men˙ del juego
+// Permite interactuar y visualizar el men√∫ del juego
 class Menu
 {
     // == ATRIBUTOS ==
     private:
         bool salir = FALSE; // Si se vuelve TRUE, se cierra el programa
-        char opcion;        // Almacena la opciÛn elegida en el men˙ principal
+        char opcion;        // Almacena la opci√≥n elegida en el men√∫ principal
         char modo;          // Almacena el modo de juego escogido por el usuario
         Utilidad utilidad;  // Objeto para dar estilo y realizar ciertas tareas en el programa
 
-    // == M…TODOS ==
+    // == M√âTODOS ==
     public:
-        // Muestra el men˙ del juego
+        // Muestra el men√∫ del juego
         void iniciar()
         {
             do
             {
-                // Mostrar la interfaz del men˙
+                // Mostrar la interfaz del men√∫
                 titulo();
 
-                // Almacenar la opciÛn escogida por el usuario
+                // Almacenar la opci√≥n escogida por el usuario
                 cin >> opcion;
                 fflush(stdin);
 
@@ -1456,12 +1456,12 @@ class Menu
                         salir = TRUE;
                         break;
 
-                    default: // Mostrar mensaje en caso de equivocaciÛn
+                    default: // Mostrar mensaje en caso de equivocaci√≥n
                         system("cls");
                         utilidad.color(8);
                         cout << "       ___________________________________________________________________________________________\n\n";
                         utilidad.color(12);
-                        cout << "\n\t\t\t\t     -OpciÛn Incorrecta - Intente Nuevamente-\n\n";
+                        cout << "\n\t\t\t\t     -Opci√≥n Incorrecta - Intente Nuevamente-\n\n";
                         utilidad.color(8);
                         cout << "       ___________________________________________________________________________________________\n\n\t";
                         utilidad.color(7);
@@ -1472,13 +1472,12 @@ class Menu
             } while (salir == FALSE);
         }
 
-        // Muestra la interfaz del men˙
+        // Muestra la interfaz del men√∫
         void titulo()
         {
-        	utilidad.color(8);
+            utilidad.color(8);
             cout << "       ___________________________________________________________________________________________\n\n\n";
-			
-			utilidad.color(3);
+	    utilidad.color(3);
             cout << "\t    ######     #########   ##        ##   #########   ######       ####     ########## \n";
             cout << "\t    #######    #########   ##        ##   #########   #######     ######    ########## \n";
             cout << "\t    ##    ##   ##          ##        ##   ##          ##    ##   ##    ##       ##     \n";
@@ -1489,22 +1488,22 @@ class Menu
             cout << "\t    ##    ##   ##             ##  ##      ##          ##    ##   ##    ##       ##     \n";
             cout << "\t    ##    ##   #########       ####       #########   ##    ##    ######    ########## \n";
             cout << "\t    ##    ##   #########        ##        #########   ##    ##     ####     ########## \n\n\n";
-			
-			utilidad.color(14);
+		
+	    utilidad.color(14);
             cout << "\t\t\t\t\t     1";
             utilidad.color(7);
-			cout << ". Comenzar Juego\n\n\n";
+	    cout << ". Comenzar Juego\n\n\n";
 			
-			utilidad.color(14);
+	    utilidad.color(14);
             cout << "\t\t\t\t\t     0";
             utilidad.color(7);
-			cout << ". Salir del juego\n\n";
+	    cout << ". Salir del juego\n\n";
             
             utilidad.color(8);
             cout << "       ___________________________________________________________________________________________\n\n";
             
             utilidad.color(7);
-            cout << "       OpciÛn (n˙mero) --> ";
+            cout << "       Opci√≥n (n√∫mero) --> ";
         }
 
         // Muestra los modos de juego disponibles
@@ -1532,10 +1531,10 @@ class Menu
             cout << "       ___________________________________________________________________________________________\n\n";
             
             utilidad.color(7);
-            cout << "      OpciÛn (n˙mero) --> ";
+            cout << "      Opci√≥n (n√∫mero) --> ";
         }
 
-        // Crea la partida en funciÛn del modo de juego elegido
+        // Crea la partida en funci√≥n del modo de juego elegido
         void crear_partida()
         {
             Partida *partida;
@@ -1558,12 +1557,12 @@ class Menu
                     partida->juego();
                     break;
 
-                default: // Mostrar mensaje en caso de equivocaciÛn
+                default: // Mostrar mensaje en caso de equivocaci√≥n
                     system("cls");
                     utilidad.color(8);
                     cout << "       ___________________________________________________________________________________________\n\n";
                     utilidad.color(12);
-                    cout << "\n\t\t\t\t     -OpciÛn Incorrecta - Intente Nuevamente-\n\n";
+                    cout << "\n\t\t\t\t     -Opci√≥n Incorrecta - Intente Nuevamente-\n\n";
                     utilidad.color(8);
                     cout << "       ___________________________________________________________________________________________\n\n\t";
                     utilidad.color(7);
@@ -1572,15 +1571,15 @@ class Menu
         }
 };
 
-// FunciÛn principal
+// Funci√≥n principal
 int main()
 {
-    // Posibilitar el uso de caracteres especiales del idioma espaÒol
+    // Posibilitar el uso de caracteres especiales del idioma espa√±ol
     setlocale(LC_CTYPE, "Spanish");
     SetConsoleCP(1252);
     SetConsoleOutputCP(1252);
 
-    // Cambiar el tÌtulo de la ventana por el nombre del juego
+    // Cambiar el t√≠tulo de la ventana por el nombre del juego
     SetConsoleTitleA("Reversi");
 
     // Inicio formal del programa
