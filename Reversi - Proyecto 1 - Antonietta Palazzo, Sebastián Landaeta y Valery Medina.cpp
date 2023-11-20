@@ -1,4 +1,4 @@
-/*	Proyecto 1: Reversi
+/*  Proyecto 1: Reversi
     Ingeniería Informática
     Estructuras de Datos
     Sección 1
